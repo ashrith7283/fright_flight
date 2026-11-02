@@ -2,9 +2,9 @@
 
 ## Purpose
 Fright Flight is a free, ad-supported, one-tap endless arcade game for **Android**.
-The player taps to keep a small aeroplane in the air and steers through gaps between
-cloud obstacles. One point per cloud pair passed. A run ends on collision with a
-cloud or the ground or the top/bottom bounds.
+The player taps to keep a small aeroplane in the air and flies over, under and
+between elliptical cloud obstacles. One point per cloud group passed. A run ends on
+collision with a cloud or the ground or the top/bottom bounds.
 
 This is a solo project. It is also a learning project for spec-driven development with
 OpenSpec and Claude Code, and a reusable template for future small games.
@@ -15,7 +15,7 @@ OpenSpec and Claude Code, and a reusable template for future small games.
 - **iOS is out of scope.** Do not add iOS-specific code, config, ATT prompts or Apple
   store work. Keep the Dart code platform-neutral so iOS can be added later, but do not
   build or test it now.
-- Portrait orientation only. Phones only; tablets just need to not break
+- Landscape orientation only (either direction). Phones only; tablets just need to not break
 ## Tech stack
 - Flutter (latest stable) and Dart, with null safety and `flutter_lints` (or `very_good_analysis`).
 - **Flame** engine for the game loop, components, collisions and sprites.
@@ -37,11 +37,11 @@ Do not explain basics at length.
 
 ## Conventions
 - Folder layout under `lib/`:
-  - `game/` Flame world, components (`plane`, `cloud_pair`, `background`), systems
+  - `game/` Flame world, components (`plane`, `cloud`, `background`), systems
   - `ui/` menu, game-over, pause and settings screens
   - `services/` `ads_service`, `audio_service`, `storage_service`
   - `core/` constants, config, utilities
-- All gameplay tuning values (gravity, flap impulse, scroll speed, gap size, spawn
+- All gameplay tuning values (gravity, flap impulse, scroll speed, lane and cloud size, spawn
   spacing, difficulty ramp) live in one `GameConfig` constants file. Specs refer to them
   by name, never by raw number, so tuning does not need a code rewrite.
 - Game logic (scoring, collision rules, difficulty curve, ad frequency rules) must be
@@ -52,10 +52,10 @@ Do not explain basics at length.
 
 ## Game rules (baseline for specs)
 - Single input: tap anywhere to flap. The plane has gravity and a flap impulse.
-- Cloud obstacles come in pairs (top and bottom) with a vertical gap. The gap position
-  is randomised within safe bounds. Gap size and scroll speed follow a gentle difficulty
-  ramp, capped so the game stays fair and always completable.
-- Score +1 when the plane passes a cloud pair. High score persists locally.
+- Cloud obstacles are ellipses in three horizontal lanes. Each group fills one or two
+  lanes, never all three, so a free lane always exists. Scroll speed and spawn spacing
+  follow a gentle difficulty ramp, capped so the game stays fair and always completable.
+- Score +1 when the plane passes a cloud group. High score persists locally.
 - Collision with a cloud, the ground or the ceiling ends the run immediately.
 - Game states: `ready` (tap to start), `playing`, `gameOver`.
 

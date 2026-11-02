@@ -1,7 +1,8 @@
+import 'dart:math';
 import 'dart:ui';
 
 import '../../core/game_config.dart';
-import 'cloud_pair_spec.dart';
+import 'cloud_spec.dart';
 
 class CollisionRules {
   const CollisionRules._();
@@ -22,14 +23,19 @@ class CollisionRules {
     return r.top <= 0 || r.bottom >= GameConfig.groundTop;
   }
 
-  static bool hitsCloud(Rect plane, CloudPairSpec pair) {
-    if (plane.right <= pair.x || plane.left >= pair.right) return false;
-    return plane.top < pair.gapTop || plane.bottom > pair.gapBottom;
+  /// Exact rectangle vs ellipse test: take the point of the rectangle nearest
+  /// the ellipse centre and check it lies inside the ellipse equation.
+  static bool hitsCloud(Rect plane, CloudSpec cloud) {
+    final nx = cloud.centreX.clamp(plane.left, plane.right);
+    final ny = cloud.centreY.clamp(plane.top, plane.bottom);
+    final dx = (nx - cloud.centreX) / (GameConfig.cloudWidth / 2);
+    final dy = (ny - cloud.centreY) / (GameConfig.cloudHeight / 2);
+    return pow(dx, 2) + pow(dy, 2) < 1;
   }
 
-  static bool hits(double y, Iterable<CloudPairSpec> pairs) {
+  static bool hits(double y, Iterable<CloudSpec> clouds) {
     if (hitsBounds(y)) return true;
     final r = planeRect(y);
-    return pairs.any((p) => hitsCloud(r, p));
+    return clouds.any((c) => hitsCloud(r, c));
   }
 }

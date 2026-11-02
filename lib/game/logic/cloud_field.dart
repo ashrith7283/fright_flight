@@ -1,46 +1,41 @@
 import '../../core/game_config.dart';
-import 'cloud_pair_spec.dart';
-import 'gap_generator.dart';
+import 'cloud_spec.dart';
+import 'lane_picker.dart';
 
-/// Scrolls, spawns and removes cloud pairs by distance travelled.
+/// Scrolls, spawns and removes cloud groups by distance travelled.
 class CloudField {
-  CloudField(this._generator);
+  CloudField(this._picker);
 
-  final GapGenerator _generator;
-  final List<CloudPairSpec> pairs = [];
+  final LanePicker _picker;
+  final List<CloudSpec> clouds = [];
   double _scrolled = 0;
-  double _nextSpawnAt = GameConfig.firstPairDistance;
-  double? _lastCentre;
+  double _nextSpawnAt = GameConfig.firstGroupDistance;
 
   void reset() {
-    pairs.clear();
+    clouds.clear();
     _scrolled = 0;
-    _nextSpawnAt = GameConfig.firstPairDistance;
-    _lastCentre = null;
+    _nextSpawnAt = GameConfig.firstGroupDistance;
   }
 
-  /// Advances by [dt]. Returns pairs spawned during this step.
-  List<CloudPairSpec> step(double dt) {
+  /// Advances by [dt]. Returns clouds spawned during this step.
+  List<CloudSpec> step(double dt) {
     final dx = GameConfig.scrollSpeed * dt;
     _scrolled += dx;
-    for (final p in pairs) {
-      p.x -= dx;
+    for (final c in clouds) {
+      c.x -= dx;
     }
-    final spawned = <CloudPairSpec>[];
+    final spawned = <CloudSpec>[];
     while (_scrolled >= _nextSpawnAt) {
-      final centre = _generator.next(_lastCentre);
-      _lastCentre = centre;
-      // Place exactly where it would be had it spawned at the right edge
-      // when the threshold was crossed, so spacing is dt-independent.
-      final pair = CloudPairSpec(
-        x: GameConfig.worldWidth - (_scrolled - _nextSpawnAt),
-        gapCentre: centre,
-      );
-      pairs.add(pair);
-      spawned.add(pair);
+      // Place exactly where the group would be had it spawned at the right
+      // edge when the threshold was crossed, so spacing is dt-independent.
+      final x = GameConfig.worldWidth - (_scrolled - _nextSpawnAt);
+      for (final lane in _picker.pick()) {
+        spawned.add(CloudSpec(x: x, lane: lane));
+      }
       _nextSpawnAt += GameConfig.spawnSpacing;
     }
-    pairs.removeWhere((p) => p.right < 0);
+    clouds.addAll(spawned);
+    clouds.removeWhere((c) => c.right < 0);
     return spawned;
   }
 }

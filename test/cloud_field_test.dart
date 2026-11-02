@@ -3,41 +3,51 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fright_flight/core/game_config.dart';
 import 'package:fright_flight/game/logic/cloud_field.dart';
-import 'package:fright_flight/game/logic/gap_generator.dart';
+import 'package:fright_flight/game/logic/lane_picker.dart';
 
-CloudField make() => CloudField(GapGenerator(Random(3)));
+CloudField make() => CloudField(LanePicker(Random(3)));
 
 void main() {
-  test('no pairs before first-pair distance', () {
+  test('no clouds before first-group distance', () {
     final f = make();
-    f.step((GameConfig.firstPairDistance - 1) / GameConfig.scrollSpeed);
-    expect(f.pairs, isEmpty);
+    f.step((GameConfig.firstGroupDistance - 1) / GameConfig.scrollSpeed);
+    expect(f.clouds, isEmpty);
   });
 
-  test('spacing between live pairs equals spawnSpacing', () {
+  test('spacing between live groups equals spawnSpacing', () {
     for (final dt in [1 / 60, 0.4]) {
       final f = make();
-      var t = 0.0;
-      while (t < 6) {
+      for (var t = 0.0; t < 8; t += dt) {
         f.step(dt);
-        t += dt;
       }
-      for (var i = 1; i < f.pairs.length; i++) {
-        expect(
-          f.pairs[i].x - f.pairs[i - 1].x,
-          closeTo(GameConfig.spawnSpacing, 1e-6),
-        );
+      final xs = f.clouds.map((c) => c.x).toSet().toList()..sort();
+      expect(xs.length, greaterThan(1));
+      for (var i = 1; i < xs.length; i++) {
+        expect(xs[i] - xs[i - 1], closeTo(GameConfig.spawnSpacing, 1e-6));
       }
     }
   });
 
-  test('pairs removed after leaving left edge', () {
+  test('clouds sit in three distinct lane centres', () {
     final f = make();
-    for (var i = 0; i < 600; i++) {
+    final centres = <double>{};
+    for (var i = 0; i < 3000; i++) {
+      f.step(1 / 60);
+      centres.addAll(f.clouds.map((c) => c.centreY));
+    }
+    expect(centres.length, GameConfig.laneCount);
+    for (var i = 0; i < GameConfig.laneCount; i++) {
+      expect(centres, contains((i + 0.5) * GameConfig.laneHeight));
+    }
+  });
+
+  test('clouds are removed after leaving the left edge', () {
+    final f = make();
+    for (var i = 0; i < 1200; i++) {
       f.step(1 / 60);
     }
-    expect(f.pairs.every((p) => p.right >= 0), isTrue);
-    expect(f.pairs.length, lessThan(5));
+    expect(f.clouds.every((c) => c.right >= 0), isTrue);
+    expect(f.clouds.length, lessThan(8));
   });
 
   test('scroll is dt-independent', () {
@@ -46,6 +56,6 @@ void main() {
       a.step(1 / 60);
     }
     b.step(306 / 60);
-    expect(a.pairs.last.x, closeTo(b.pairs.last.x, 1e-6));
+    expect(a.clouds.last.x, closeTo(b.clouds.last.x, 1e-6));
   });
 }
