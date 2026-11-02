@@ -11,6 +11,7 @@ void main() {
   final centred = CloudSpec(
     x: planeCentreX - GameConfig.cloudWidth / 2,
     lane: 1,
+    groupId: 0,
   );
 
   test('ceiling and ground collide', () {
@@ -51,12 +52,12 @@ void main() {
     );
     expect(plane.width, greaterThan(0));
     expect(corner.overlaps(b), isTrue);
-    final c = CloudSpec(x: corner.right - 2, lane: 1);
+    final c = CloudSpec(x: corner.right - 2, lane: 1, groupId: 0);
     expect(CollisionRules.hitsCloud(corner, c), isFalse);
   });
 
   test('cloud not overlapping horizontally is harmless', () {
-    final far = CloudSpec(x: 700, lane: 1);
+    final far = CloudSpec(x: 700, lane: 1, groupId: 0);
     expect(CollisionRules.hits(GameConfig.planeStartY, [far]), isFalse);
   });
 }

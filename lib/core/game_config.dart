@@ -36,4 +36,14 @@ class GameConfig {
   // Run lifecycle.
   static const double restartDelay = 0.6;
   static const double maxFrameDelta = 0.05;
+
+  // Score text (world units, anchored top-left unless noted).
+  static const Color scoreTextColor = Color(0xFFFFFFFF);
+  static const double scoreFontSize = 32;
+  static const double scoreTextX = 20;
+  static const double scoreTextY = 12;
+  static const double gameOverFontSize = 28;
+  static const double gameOverTextX = worldWidth / 2; // centre-anchored
+  static const double gameOverTextY = 110;
+  static const double gameOverLineSpacing = 40;
 }

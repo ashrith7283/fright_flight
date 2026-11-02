@@ -9,11 +9,13 @@ class CloudField {
   final LanePicker _picker;
   final List<CloudSpec> clouds = [];
   double _scrolled = 0;
+  int _nextGroupId = 0;
   double _nextSpawnAt = GameConfig.firstGroupDistance;
 
   void reset() {
     clouds.clear();
     _scrolled = 0;
+    _nextGroupId = 0;
     _nextSpawnAt = GameConfig.firstGroupDistance;
   }
 
@@ -29,8 +31,9 @@ class CloudField {
       // Place exactly where the group would be had it spawned at the right
       // edge when the threshold was crossed, so spacing is dt-independent.
       final x = GameConfig.worldWidth - (_scrolled - _nextSpawnAt);
+      final groupId = _nextGroupId++;
       for (final lane in _picker.pick()) {
-        spawned.add(CloudSpec(x: x, lane: lane));
+        spawned.add(CloudSpec(x: x, lane: lane, groupId: groupId));
       }
       _nextSpawnAt += GameConfig.spawnSpacing;
     }
