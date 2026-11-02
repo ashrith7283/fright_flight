@@ -16,12 +16,12 @@
 ## 3. Flame components
 
 - [x] 3.1 Replace `CloudPairComponent` with `CloudComponent` (placeholder `drawOval`), update spawn and removal wiring in `FrightFlightGame`, and adjust `BackgroundComponent` for the new world; verify on the emulator that ellipses enter from the right, sit in three lanes and are removed off-screen
-- [ ] 3.2 Verify on the emulator that hitting a cloud ellipse, the ground and the ceiling each end the run, that flying over and under a cloud does not, and that tap-to-restart still works
+- [x] 3.2 Verify on the emulator that hitting a cloud ellipse, the ground and the ceiling each end the run, that flying over and under a cloud does not, and that tap-to-restart still works
 
 ## 4. Docs and play-test
 
 - [x] 4.1 Update `openspec/project.md` (orientation line and cloud wording in Purpose and Game rules) and verify no "portrait" or "cloud pair" text remains
-- [ ] 4.2 Play-test on the emulator at two screen sizes (for example 2400x1080 and a 16:9 size via `wm size`), tune `GameConfig` only to make the game fair, and record final values in the change summary
+- [x] 4.2 Play-test on the emulator at two screen sizes (for example 2400x1080 and a 16:9 size via `wm size`), tune `GameConfig` only to make the game fair, and record final values in the change summary
 - [x] 4.3 Run `dart format .`, `flutter analyze` and `flutter test`; verify all are clean with no TODOs and no dead code
 
 ## Workflow follow-up
