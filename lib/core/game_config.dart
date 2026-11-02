@@ -46,4 +46,8 @@ class GameConfig {
   static const double gameOverTextX = worldWidth / 2; // centre-anchored
   static const double gameOverTextY = 110;
   static const double gameOverLineSpacing = 40;
+
+  // Game-over buttons (Flutter overlay): top edge as a fraction of screen
+  // height, placed below the game-over text (ends near world y 260 of 400).
+  static const double gameOverActionsTopFraction = 0.7;
 }

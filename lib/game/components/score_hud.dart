@@ -6,7 +6,7 @@ import '../logic/run_controller.dart';
 import '../logic/score_keeper.dart';
 import '../logic/score_text.dart';
 
-/// Plain-text score readout. Hidden in ready, live score while playing,
+/// Plain-text score readout. Hidden in menu and ready, live score while playing or paused,
 /// score / best / "new best" on game over. Holds no score state itself.
 class ScoreHud extends PositionComponent {
   ScoreHud({required this.score, required this.runState}) : super(priority: 10);
@@ -28,9 +28,11 @@ class ScoreHud extends PositionComponent {
   @override
   void render(Canvas canvas) {
     switch (runState()) {
+      case RunState.menu:
       case RunState.ready:
         return;
       case RunState.playing:
+      case RunState.paused:
         _playingPaint.render(
           canvas,
           ScoreText.playing(score.score),

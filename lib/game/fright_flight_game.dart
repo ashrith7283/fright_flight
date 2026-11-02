@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleState;
 
 import '../core/game_config.dart';
 import 'components/background_component.dart';
@@ -38,6 +39,53 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   final Map<Object, CloudComponent> _cloudComponents = {};
 
   RunState get runState => _run.state;
+  int get highScore => _score.highScore;
+
+  static const mainMenuOverlay = 'mainMenu';
+  static const pauseButtonOverlay = 'pauseButton';
+  static const pauseMenuOverlay = 'pauseMenu';
+  static const gameOverActionsOverlay = 'gameOverActions';
+
+  void play() => _transition(_run.play);
+  void pause() => _transition(_run.pause);
+  void resume() => _transition(_run.resume);
+  void toMenu() => _transition(_run.toMenu);
+  void restart() => _transition(_run.restart);
+
+  void _transition(void Function() action) {
+    action();
+    _syncOverlays();
+  }
+
+  /// Maps the run state to the overlay set. Idempotent; call after every
+  /// transition so overlays cannot drift from state.
+  void _syncOverlays() {
+    final wanted = <String>{
+      if (_run.state == RunState.menu) mainMenuOverlay,
+      if (_run.state == RunState.playing) pauseButtonOverlay,
+      if (_run.state == RunState.paused) pauseMenuOverlay,
+      if (_run.canRestart) gameOverActionsOverlay,
+    };
+    for (final name in const [
+      mainMenuOverlay,
+      pauseButtonOverlay,
+      pauseMenuOverlay,
+      gameOverActionsOverlay,
+    ]) {
+      if (wanted.contains(name)) {
+        if (!overlays.isActive(name)) overlays.add(name);
+      } else {
+        overlays.remove(name);
+      }
+    }
+  }
+
+  @override
+  void lifecycleStateChange(AppLifecycleState state) {
+    super.lifecycleStateChange(state);
+    // pause() only acts in the playing state; never resumes by itself.
+    if (state != AppLifecycleState.resumed) pause();
+  }
 
   @override
   Future<void> onLoad() async {
@@ -49,12 +97,13 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   }
 
   @override
-  void onTapDown(TapDownEvent event) => _run.onTap();
+  void onTapDown(TapDownEvent event) => _transition(_run.onTap);
 
   @override
   void update(double dt) {
     final step = min(dt, GameConfig.maxFrameDelta);
     _run.update(step);
+    if (_run.state == RunState.gameOver) _syncOverlays();
     if (_run.state == RunState.playing) {
       _body.step(step);
       for (final spec in _field.step(step)) {
@@ -68,7 +117,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
         return gone;
       });
       if (CollisionRules.hits(_body.y, _field.clouds)) {
-        _run.crash();
+        _transition(_run.crash);
         // Not awaited: the write must not delay game over (errors are caught).
         unawaited(_score.finishRun());
       } else {
