@@ -11,6 +11,7 @@ import 'components/background_component.dart';
 import 'components/cloud_component.dart';
 import 'components/plane_component.dart';
 import 'components/score_hud.dart';
+import 'components/smoke_trail.dart';
 import 'logic/cloud_field.dart';
 import 'logic/collision_rules.dart';
 import 'logic/lane_picker.dart';
@@ -37,6 +38,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   late final RunController _run;
   late final ScoreKeeper _score;
   final Map<Object, CloudComponent> _cloudComponents = {};
+  late final SmokeTrail _smoke;
 
   RunState get runState => _run.state;
   int get highScore => _score.highScore;
@@ -93,6 +95,8 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     camera.viewfinder.anchor = Anchor.topLeft;
     bool running() => _run.state == RunState.playing;
     world.add(BackgroundComponent(isRunning: running));
+    _smoke = SmokeTrail(_body, isRunning: running);
+    world.add(_smoke);
     world.add(PlaneComponent(_body, isRunning: running));
     world.add(ScoreHud(score: _score, runState: () => _run.state));
   }
@@ -131,6 +135,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void _reset() {
     _score.reset();
     _body.reset();
+    _smoke.clear();
     _field.reset();
     for (final c in _cloudComponents.values) {
       c.removeFromParent();

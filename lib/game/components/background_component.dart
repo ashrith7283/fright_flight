@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/components.dart';
@@ -13,6 +14,7 @@ class BackgroundComponent extends PositionComponent {
 
   final bool Function() _isRunning;
   double _hillOffset = 0;
+  double _time = 0;
 
   static final _sky = Paint()
     ..shader = Gradient.linear(
@@ -32,9 +34,16 @@ class BackgroundComponent extends PositionComponent {
 
   static const double _hillPeriod = 400;
 
+  static final _birdPaint = Paint()
+    ..color = GameConfig.birdColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.8
+    ..strokeCap = StrokeCap.round;
+
   @override
   void update(double dt) {
     if (!_isRunning()) return;
+    _time += dt;
     _hillOffset =
         (_hillOffset +
             GameConfig.scrollSpeed * GameConfig.bgHillParallax * dt) %
@@ -57,6 +66,14 @@ class BackgroundComponent extends PositionComponent {
     // Sun (fixed).
     canvas.drawCircle(const Offset(680, 70), 42, _sunGlow);
     canvas.drawCircle(const Offset(680, 70), 26, _sun);
+
+    // Birds: move and flap only while running.
+    for (final b in GameConfig.birds) {
+      final span = GameConfig.worldWidth + 2 * GameConfig.birdWingspan;
+      final x = ((b[0] - b[2] * _time) % span) - GameConfig.birdWingspan;
+      final flap = sin(_time * GameConfig.birdFlapRate + b[3]);
+      _bird(canvas, x, b[1], flap);
+    }
 
     // Hills: far layer then near layer, scrolling at different rates.
     _hills(canvas, _hillFar, _hillOffset * 0.5, 60, 38);
@@ -109,5 +126,15 @@ class BackgroundComponent extends PositionComponent {
       ..lineTo(GameConfig.worldWidth + period, GameConfig.groundTop)
       ..close();
     canvas.drawPath(path, paint);
+  }
+
+  void _bird(Canvas canvas, double x, double y, double flap) {
+    final half = GameConfig.birdWingspan / 2;
+    final tip = -flap * half * 0.5; // wing tips swing up and down
+    final path = Path()
+      ..moveTo(x - half, y + tip)
+      ..quadraticBezierTo(x - half / 2, y - 2, x, y)
+      ..quadraticBezierTo(x + half / 2, y - 2, x + half, y + tip);
+    canvas.drawPath(path, _birdPaint);
   }
 }

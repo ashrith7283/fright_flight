@@ -30,6 +30,25 @@ class GameConfig {
   static const double propellerSpinRate = 40; // radians per second
   static const double bgHillParallax = 0.4;
 
+  // Smoke trail (cosmetic).
+  static const double smokeSpawnInterval = 0.1;
+  static const double smokeLifetime = 0.8;
+  static const double smokeStartRadius = 3;
+  static const double smokeEndRadius = 9;
+  static const double smokeStartAlpha = 0.55;
+  static const Color smokeColor = Color(0xFFEEEEEE);
+
+  // Birds (cosmetic): x, y, speed (units/s), flap phase. Small, dark, high up.
+  static const List<List<double>> birds = [
+    [120, 40, 26, 0.0],
+    [330, 85, 34, 1.7],
+    [470, 28, 22, 3.1],
+    [610, 120, 30, 4.6],
+  ];
+  static const double birdWingspan = 18;
+  static const double birdFlapRate = 9; // radians per second
+  static const Color birdColor = Color(0xFF263238);
+
   // Plane.
   static const double planeWidth = 48;
   static const double planeHeight = 30;
