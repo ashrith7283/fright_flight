@@ -13,6 +13,23 @@ class GameConfig {
 
   static const Color skyColor = Color(0xFF8FD3F4);
 
+  // Visual style (cosmetic only; never affects collisions).
+  static const Color skyTopColor = Color(0xFF3E9BE0);
+  static const Color skyBottomColor = Color(0xFFCDEBFA);
+  static const Color sunColor = Color(0xFFFFE680);
+  static const Color hillFarColor = Color(0xFF7FB069);
+  static const Color hillNearColor = Color(0xFF5E9A3C);
+  static const Color groundColor = Color(0xFF4F8A2E);
+  static const Color groundDarkColor = Color(0xFF3F7424);
+  static const Color cloudColor = Color(0xFFFFFFFF);
+  static const Color cloudShadeColor = Color(0xFFD5E3EE);
+  static const Color planeBodyColor = Color(0xFFD32F2F);
+  static const Color planeWingColor = Color(0xFFB71C1C);
+  static const Color planeWindowColor = Color(0xFF81D4FA);
+  static const double planeMaxTilt = 0.45; // radians
+  static const double propellerSpinRate = 40; // radians per second
+  static const double bgHillParallax = 0.4;
+
   // Plane.
   static const double planeWidth = 48;
   static const double planeHeight = 30;

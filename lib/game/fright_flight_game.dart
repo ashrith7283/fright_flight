@@ -91,8 +91,9 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   Future<void> onLoad() async {
     await _score.load(); // never throws; falls back to 0
     camera.viewfinder.anchor = Anchor.topLeft;
-    world.add(BackgroundComponent());
-    world.add(PlaneComponent(_body));
+    bool running() => _run.state == RunState.playing;
+    world.add(BackgroundComponent(isRunning: running));
+    world.add(PlaneComponent(_body, isRunning: running));
     world.add(ScoreHud(score: _score, runState: () => _run.state));
   }
 

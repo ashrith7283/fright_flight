@@ -17,9 +17,10 @@ void main() {
   testWidgets('main menu shows title, high score and Play', (t) async {
     var played = 0;
     await t.pumpWidget(_wrap(MainMenu(highScore: 7, onPlay: () => played++)));
-    expect(find.text('Fright Flight'), findsOneWidget);
-    expect(find.text('High score: 7'), findsOneWidget);
-    await t.tap(find.text('Play'));
+    expect(find.text('FRIGHT'), findsOneWidget);
+    expect(find.text('FLIGHT'), findsOneWidget);
+    expect(find.text('BEST  7'), findsOneWidget);
+    await t.tap(find.text('PLAY'));
     expect(played, 1);
   });
 
