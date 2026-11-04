@@ -74,7 +74,11 @@ void main() {
 
   testWidgets('game launches in menu; play, pause, resume, toMenu', (t) async {
     final storage = FakeStorageService();
-    final game = FrightFlightGame(storage: storage, audio: NoopAudioService());
+    final game = FrightFlightGame(
+      storage: storage,
+      audio: NoopAudioService(),
+      minLoadTime: Duration.zero,
+    );
     const names = [
       FrightFlightGame.mainMenuOverlay,
       FrightFlightGame.pauseButtonOverlay,

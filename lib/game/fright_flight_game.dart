@@ -27,6 +27,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     Random? random,
     StorageService? storage,
     AudioService? audio,
+    Duration? minLoadTime,
   }) : super(
          camera: CameraComponent.withFixedResolution(
            width: GameConfig.worldWidth,
@@ -37,6 +38,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     _storage = storage ?? SharedPreferencesStorageService();
     _score = ScoreKeeper(_storage);
     _audio = audio ?? FlameAudioService();
+    _minLoadTime = minLoadTime ?? GameConfig.loadingMinDuration;
     _run = RunController(
       onStart: () {},
       onFlap: () {
@@ -53,6 +55,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   late final ScoreKeeper _score;
   late final StorageService _storage;
   late final AudioService _audio;
+  late final Duration _minLoadTime;
 
   /// Mute setting, shared by the menu buttons.
   final ValueNotifier<bool> muted = ValueNotifier(false);
@@ -141,14 +144,23 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
 
   @override
   Future<void> onLoad() async {
-    await _score.load(); // never throws; falls back to 0
+    // The loading screen stays up until both the real loading and the
+    // minimum display time are done.
+    final minTime = _minLoadTime == Duration.zero
+        ? Future<void>.value()
+        : Future<void>.delayed(_minLoadTime);
     try {
-      muted.value = await _storage.readMuted() ?? false;
+      await _score.load(); // never throws; falls back to 0
+      try {
+        muted.value = await _storage.readMuted() ?? false;
+      } catch (_) {
+        muted.value = false;
+      }
+      _audio.setMuted(muted.value);
+      await _audio.preload(); // never throws
     } catch (_) {
-      muted.value = false;
+      // Last-resort guard: loading must never keep the app on the loader.
     }
-    _audio.setMuted(muted.value);
-    await _audio.preload(); // never throws
     camera.viewfinder.anchor = Anchor.topLeft;
     bool running() => _run.state == RunState.playing;
     world.add(BackgroundComponent(isRunning: running));
@@ -156,6 +168,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     world.add(_smoke);
     world.add(PlaneComponent(_body, isRunning: running));
     world.add(ScoreHud(score: _score, runState: () => _run.state));
+    await minTime;
   }
 
   @override

@@ -23,14 +23,16 @@ class ScoreHud extends PositionComponent {
   );
 
   static final _playingPaint = _paint(GameConfig.scoreFontSize);
+  static final _bestPaint = _paint(GameConfig.bestFontSize);
   static final _gameOverPaint = _paint(GameConfig.gameOverFontSize);
 
   @override
   void render(Canvas canvas) {
     switch (runState()) {
       case RunState.menu:
-      case RunState.ready:
         return;
+      case RunState.ready:
+        _renderBest(canvas, GameConfig.scoreTextY);
       case RunState.playing:
       case RunState.paused:
         _playingPaint.render(
@@ -38,6 +40,7 @@ class ScoreHud extends PositionComponent {
           ScoreText.playing(score.score),
           Vector2(GameConfig.scoreTextX, GameConfig.scoreTextY),
         );
+        _renderBest(canvas, GameConfig.bestTextY);
       case RunState.gameOver:
         final lines = ScoreText.gameOver(
           score: score.score,
@@ -57,4 +60,10 @@ class ScoreHud extends PositionComponent {
         }
     }
   }
+
+  void _renderBest(Canvas canvas, double y) => _bestPaint.render(
+    canvas,
+    ScoreText.best(score.score, score.highScore),
+    Vector2(GameConfig.scoreTextX, y),
+  );
 }

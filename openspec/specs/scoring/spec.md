@@ -124,7 +124,7 @@ A failure to read or write the high score SHALL NOT crash the game, block input 
 - **THEN** the write is attempted again with that run's value
 
 ### Requirement: Score is shown during play
-While the game is in the playing state, the game SHALL display the current score as plain text. The score text SHALL NOT be shown in the ready state.
+While the game is in the playing state, the game SHALL display the current score as plain text. The game SHALL also display the best score in the game window whenever the game is in the ready, playing or paused state. The score text SHALL NOT be shown in the ready state. The displayed best score SHALL never be lower than the current score.
 
 #### Scenario: Score visible while playing
 - **WHEN** the game is in the playing state
@@ -132,7 +132,23 @@ While the game is in the playing state, the game SHALL display the current score
 
 #### Scenario: Hidden before the first tap
 - **WHEN** the game is in the ready state
-- **THEN** no score text is displayed
+- **THEN** no current-score text is displayed
+
+#### Scenario: Best score visible in the game window
+- **WHEN** the game is in the ready, playing or paused state
+- **THEN** the best score is displayed in the game window
+
+#### Scenario: Best score on a fresh install
+- **WHEN** no high score has been stored
+- **THEN** the best score shows 0
+
+#### Scenario: Passing the best score during a run
+- **WHEN** the current score exceeds the stored high score during a run
+- **THEN** the displayed best score equals the current score and keeps rising with it, while nothing is written to storage until game over
+
+#### Scenario: Best score hidden on the menu
+- **WHEN** the main menu is shown
+- **THEN** the best score is shown by the menu only, not duplicated in the game window
 
 ### Requirement: Game over shows score, high score and new best
 In the game-over state, the game SHALL display the final score and the high score as plain text. It SHALL additionally display a "new best" indication if and only if the final score beat the previously stored high score in that run.

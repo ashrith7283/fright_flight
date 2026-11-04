@@ -69,6 +69,9 @@ class GameConfig {
   static const double spawnSpacing = 460;
   static const double firstGroupDistance = 300;
 
+  // Loading screen: minimum time shown at cold start.
+  static const Duration loadingMinDuration = Duration(milliseconds: 1200);
+
   // Run lifecycle.
   static const double restartDelay = 0.6;
   static const double maxFrameDelta = 0.05;
@@ -78,6 +81,8 @@ class GameConfig {
   static const double scoreFontSize = 32;
   static const double scoreTextX = 20;
   static const double scoreTextY = 12;
+  static const double bestFontSize = 18;
+  static const double bestTextY = scoreTextY + scoreFontSize + 6;
   static const double gameOverFontSize = 28;
   static const double gameOverTextX = worldWidth / 2; // centre-anchored
   static const double gameOverTextY = 110;

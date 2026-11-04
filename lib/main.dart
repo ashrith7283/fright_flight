@@ -6,6 +6,7 @@ import 'core/game_config.dart';
 import 'game/fright_flight_game.dart';
 import 'game/logic/back_action.dart';
 import 'ui/game_over_actions.dart';
+import 'ui/loading_screen.dart';
 import 'ui/main_menu.dart';
 import 'ui/pause_button.dart';
 import 'ui/pause_menu.dart';
@@ -55,6 +56,7 @@ class _FrightFlightAppState extends State<FrightFlightApp> {
           game: _game,
           backgroundBuilder: (_) =>
               const ColoredBox(color: GameConfig.skyColor),
+          loadingBuilder: (_) => const LoadingScreen(),
           initialActiveOverlays: const [FrightFlightGame.mainMenuOverlay],
           overlayBuilderMap: {
             FrightFlightGame.mainMenuOverlay: (_, g) => MainMenu(

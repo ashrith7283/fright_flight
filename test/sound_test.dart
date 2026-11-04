@@ -12,7 +12,11 @@ Future<FrightFlightGame> _launch(
   RecordingAudioService audio,
   FakeStorageService storage,
 ) async {
-  final game = FrightFlightGame(storage: storage, audio: audio);
+  final game = FrightFlightGame(
+    storage: storage,
+    audio: audio,
+    minLoadTime: Duration.zero,
+  );
   const names = [
     FrightFlightGame.mainMenuOverlay,
     FrightFlightGame.pauseButtonOverlay,

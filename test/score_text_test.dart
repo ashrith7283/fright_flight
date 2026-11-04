@@ -17,4 +17,11 @@ void main() {
       'New best!',
     ]);
   });
+
+  test('best shows the stored record, and rises past it during a run', () {
+    expect(ScoreText.best(0, 0), 'Best: 0'); // fresh install
+    expect(ScoreText.best(3, 10), 'Best: 10');
+    expect(ScoreText.best(10, 10), 'Best: 10');
+    expect(ScoreText.best(11, 10), 'Best: 11');
+  });
 }
