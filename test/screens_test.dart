@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fright_flight/game/fright_flight_game.dart';
 import 'package:fright_flight/game/logic/run_controller.dart';
 import 'package:fright_flight/game/logic/score_keeper.dart';
+import 'package:fright_flight/services/audio_service.dart';
 import 'package:fright_flight/ui/game_over_actions.dart';
 import 'package:fright_flight/ui/main_menu.dart';
+import 'package:fright_flight/ui/mute_button.dart';
 import 'package:fright_flight/ui/pause_button.dart';
 import 'package:fright_flight/ui/pause_menu.dart';
 
@@ -16,12 +18,24 @@ Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 void main() {
   testWidgets('main menu shows title, high score and Play', (t) async {
     var played = 0;
-    await t.pumpWidget(_wrap(MainMenu(highScore: 7, onPlay: () => played++)));
+    var toggled = 0;
+    await t.pumpWidget(
+      _wrap(
+        MainMenu(
+          highScore: 7,
+          onPlay: () => played++,
+          muted: ValueNotifier(false),
+          onToggleMute: () => toggled++,
+        ),
+      ),
+    );
     expect(find.text('FRIGHT'), findsOneWidget);
     expect(find.text('FLIGHT'), findsOneWidget);
     expect(find.text('BEST  7'), findsOneWidget);
     await t.tap(find.text('PLAY'));
     expect(played, 1);
+    await t.tap(find.byIcon(Icons.volume_up));
+    expect(toggled, 1);
   });
 
   testWidgets('pause button and pause menu call their callbacks', (t) async {
@@ -31,8 +45,16 @@ void main() {
     expect(paused, 1);
 
     await t.pumpWidget(
-      _wrap(PauseMenu(onResume: () => resumed++, onMenu: () => menu++)),
+      _wrap(
+        PauseMenu(
+          onResume: () => resumed++,
+          onMenu: () => menu++,
+          muted: ValueNotifier(true),
+          onToggleMute: () {},
+        ),
+      ),
     );
+    expect(find.byIcon(Icons.volume_off), findsOneWidget);
     await t.tap(find.text('Resume'));
     await t.tap(find.text('Menu'));
     expect((resumed, menu), (1, 1));
@@ -52,7 +74,7 @@ void main() {
 
   testWidgets('game launches in menu; play, pause, resume, toMenu', (t) async {
     final storage = FakeStorageService();
-    final game = FrightFlightGame(storage: storage);
+    final game = FrightFlightGame(storage: storage, audio: NoopAudioService());
     const names = [
       FrightFlightGame.mainMenuOverlay,
       FrightFlightGame.pauseButtonOverlay,
@@ -88,5 +110,14 @@ void main() {
     expect(storage.writes, isEmpty);
     expect(k.highScore, 1);
     expect(k.score, 0);
+  });
+
+  testWidgets('mute button reflects the notifier', (t) async {
+    final muted = ValueNotifier(false);
+    await t.pumpWidget(_wrap(MuteButton(muted: muted, onToggle: () {})));
+    expect(find.byIcon(Icons.volume_up), findsOneWidget);
+    muted.value = true;
+    await t.pump();
+    expect(find.byIcon(Icons.volume_off), findsOneWidget);
   });
 }

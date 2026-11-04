@@ -20,4 +20,22 @@ class FakeStorageService implements StorageService {
     writes.add(value);
     stored = value;
   }
+
+  bool? storedMuted;
+  bool failMutedReads = false;
+  bool failMutedWrites = false;
+  final List<bool> mutedWrites = [];
+
+  @override
+  Future<bool?> readMuted() async {
+    if (failMutedReads) throw Exception('read failed');
+    return storedMuted;
+  }
+
+  @override
+  Future<void> writeMuted(bool value) async {
+    if (failMutedWrites) throw Exception('write failed');
+    mutedWrites.add(value);
+    storedMuted = value;
+  }
 }

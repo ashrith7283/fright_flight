@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter/widgets.dart' show AppLifecycleState;
 
 import '../core/game_config.dart';
@@ -18,25 +19,43 @@ import 'logic/lane_picker.dart';
 import 'logic/plane_body.dart';
 import 'logic/run_controller.dart';
 import 'logic/score_keeper.dart';
+import '../services/audio_service.dart';
 import '../services/storage_service.dart';
 
 class FrightFlightGame extends FlameGame with TapCallbacks {
-  FrightFlightGame({Random? random, StorageService? storage})
-    : super(
-        camera: CameraComponent.withFixedResolution(
-          width: GameConfig.worldWidth,
-          height: GameConfig.worldHeight,
-        ),
-      ) {
+  FrightFlightGame({
+    Random? random,
+    StorageService? storage,
+    AudioService? audio,
+  }) : super(
+         camera: CameraComponent.withFixedResolution(
+           width: GameConfig.worldWidth,
+           height: GameConfig.worldHeight,
+         ),
+       ) {
     _field = CloudField(LanePicker(random));
-    _score = ScoreKeeper(storage ?? SharedPreferencesStorageService());
-    _run = RunController(onStart: () {}, onFlap: _body.flap, onReset: _reset);
+    _storage = storage ?? SharedPreferencesStorageService();
+    _score = ScoreKeeper(_storage);
+    _audio = audio ?? FlameAudioService();
+    _run = RunController(
+      onStart: () {},
+      onFlap: () {
+        _body.flap();
+        _audio.playFlap();
+      },
+      onReset: _reset,
+    );
   }
 
   final PlaneBody _body = PlaneBody();
   late final CloudField _field;
   late final RunController _run;
   late final ScoreKeeper _score;
+  late final StorageService _storage;
+  late final AudioService _audio;
+
+  /// Mute setting, shared by the menu buttons.
+  final ValueNotifier<bool> muted = ValueNotifier(false);
   final Map<Object, CloudComponent> _cloudComponents = {};
   late final SmokeTrail _smoke;
 
@@ -55,8 +74,34 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void restart() => _transition(_run.restart);
 
   void _transition(void Function() action) {
+    final before = _run.state;
     action();
     _syncOverlays();
+    _syncMusic(before, _run.state);
+  }
+
+  /// Maps a run-state change to a music action.
+  void _syncMusic(RunState before, RunState after) {
+    if (before == after) return;
+    switch (after) {
+      case RunState.ready:
+        _audio.startMusic(); // from the menu or after game over
+      case RunState.playing:
+        if (before == RunState.paused) _audio.resumeMusic();
+      case RunState.paused:
+        _audio.pauseMusic();
+      case RunState.menu:
+      case RunState.gameOver:
+        _audio.stopMusic();
+    }
+  }
+
+  void toggleMute() {
+    muted.value = !muted.value;
+    _audio.setMuted(muted.value);
+    _storage.writeMuted(muted.value).catchError((_) {
+      // The in-memory setting stays for this session.
+    });
   }
 
   /// Maps the run state to the overlay set. Idempotent; call after every
@@ -86,12 +131,24 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void lifecycleStateChange(AppLifecycleState state) {
     super.lifecycleStateChange(state);
     // pause() only acts in the playing state; never resumes by itself.
-    if (state != AppLifecycleState.resumed) pause();
+    if (state != AppLifecycleState.resumed) {
+      pause();
+      _audio.pauseMusic(); // also covers the ready state
+    } else if (_run.state == RunState.ready) {
+      _audio.resumeMusic();
+    }
   }
 
   @override
   Future<void> onLoad() async {
     await _score.load(); // never throws; falls back to 0
+    try {
+      muted.value = await _storage.readMuted() ?? false;
+    } catch (_) {
+      muted.value = false;
+    }
+    _audio.setMuted(muted.value);
+    await _audio.preload(); // never throws
     camera.viewfinder.anchor = Anchor.topLeft;
     bool running() => _run.state == RunState.playing;
     world.add(BackgroundComponent(isRunning: running));
@@ -122,11 +179,12 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
         return gone;
       });
       if (CollisionRules.hits(_body.y, _field.clouds)) {
-        _transition(_run.crash);
+        _transition(_run.crash); // stops the music
+        _audio.playCrash();
         // Not awaited: the write must not delay game over (errors are caught).
         unawaited(_score.finishRun());
       } else {
-        _score.onCloudsAdvanced(_field.clouds);
+        if (_score.onCloudsAdvanced(_field.clouds) > 0) _audio.playScore();
       }
     }
     super.update(step);

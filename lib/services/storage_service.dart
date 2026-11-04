@@ -6,10 +6,15 @@ abstract class StorageService {
   /// Returns null when nothing has been stored.
   Future<int?> readHighScore();
   Future<void> writeHighScore(int value);
+
+  /// Returns null when nothing has been stored.
+  Future<bool?> readMuted();
+  Future<void> writeMuted(bool value);
 }
 
 class SharedPreferencesStorageService implements StorageService {
   static const _highScoreKey = 'high_score';
+  static const _mutedKey = 'muted';
 
   // Fetched per call (the instance is cached by the plugin) so a failing
   // lookup is an ordinary exception, not a launch crash.
@@ -23,5 +28,17 @@ class SharedPreferencesStorageService implements StorageService {
   Future<void> writeHighScore(int value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_highScoreKey, value);
+  }
+
+  @override
+  Future<bool?> readMuted() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_mutedKey);
+  }
+
+  @override
+  Future<void> writeMuted(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_mutedKey, value);
   }
 }

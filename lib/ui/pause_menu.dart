@@ -1,10 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'mute_button.dart';
+
 class PauseMenu extends StatelessWidget {
-  const PauseMenu({super.key, required this.onResume, required this.onMenu});
+  const PauseMenu({
+    super.key,
+    required this.onResume,
+    required this.onMenu,
+    required this.muted,
+    required this.onToggleMute,
+  });
 
   final VoidCallback onResume;
   final VoidCallback onMenu;
+  final ValueListenable<bool> muted;
+  final VoidCallback onToggleMute;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +42,8 @@ class PauseMenu extends StatelessWidget {
                 onPressed: onMenu,
                 child: const Text('Menu'),
               ),
+              const SizedBox(height: 8),
+              MuteButton(muted: muted, onToggle: onToggleMute),
             ],
           ),
         ),

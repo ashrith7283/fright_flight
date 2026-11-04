@@ -57,12 +57,20 @@ class _FrightFlightAppState extends State<FrightFlightApp> {
               const ColoredBox(color: GameConfig.skyColor),
           initialActiveOverlays: const [FrightFlightGame.mainMenuOverlay],
           overlayBuilderMap: {
-            FrightFlightGame.mainMenuOverlay: (_, g) =>
-                MainMenu(highScore: g.highScore, onPlay: g.play),
+            FrightFlightGame.mainMenuOverlay: (_, g) => MainMenu(
+              highScore: g.highScore,
+              onPlay: g.play,
+              muted: g.muted,
+              onToggleMute: g.toggleMute,
+            ),
             FrightFlightGame.pauseButtonOverlay: (_, g) =>
                 PauseButton(onPause: g.pause),
-            FrightFlightGame.pauseMenuOverlay: (_, g) =>
-                PauseMenu(onResume: g.resume, onMenu: g.toMenu),
+            FrightFlightGame.pauseMenuOverlay: (_, g) => PauseMenu(
+              onResume: g.resume,
+              onMenu: g.toMenu,
+              muted: g.muted,
+              onToggleMute: g.toggleMute,
+            ),
             FrightFlightGame.gameOverActionsOverlay: (_, g) =>
                 GameOverActions(onRestart: g.restart, onMenu: g.toMenu),
           },
