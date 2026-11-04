@@ -26,9 +26,39 @@ class GameConfig {
   static const Color planeBodyColor = Color(0xFFD32F2F);
   static const Color planeWingColor = Color(0xFFB71C1C);
   static const Color planeWindowColor = Color(0xFF81D4FA);
-  static const double planeMaxTilt = 0.45; // radians
+  static const double planeMaxTilt = 0.22; // radians
+  static const double planeTiltEaseRate = 10; // per second
   static const double propellerSpinRate = 40; // radians per second
   static const double bgHillParallax = 0.4;
+
+  // Sky progression by score: day -> sunset -> dusk (cosmetic).
+  static const int skySunsetScore = 15;
+  static const int skyDuskScore = 35;
+  static const double skyEaseRate = 1.5; // per second towards the target
+  static const Color skySunsetTop = Color(0xFF5C6BC0);
+  static const Color skySunsetBottom = Color(0xFFFFB27A);
+  static const Color skyDuskTop = Color(0xFF283A7A);
+  static const Color skyDuskBottom = Color(0xFF9575B0);
+  static const Color sunSunsetColor = Color(0xFFFFA24D);
+  static const Color sunDuskColor = Color(0xFFFF7043);
+  static const double sunX = 680;
+  static const double sunDayY = 70;
+  static const double sunSunsetY = 190;
+  static const double sunDuskY = 245;
+
+  // Extra parallax layers (fractions of the base scroll speed).
+  static const double bgMountainParallax = 0.12;
+  static const double bgHazeParallax = 0.22;
+  static const Color mountainColor = Color(0xFF6F8FB0);
+  static const Color hazeColor = Color(0x55FFFFFF);
+
+  // Shared UI look.
+  static const Color uiAccent = Color(0xFFE53935);
+  static const Color uiGlassFill = Color(0x6620364F);
+  static const Color uiGlassBorder = Color(0x80FFFFFF);
+  static const double uiGlassBlur = 12;
+  static const double uiRadius = 24;
+  static const Duration uiAnimation = Duration(milliseconds: 220);
 
   // Smoke trail (cosmetic).
   static const double smokeSpawnInterval = 0.1;
@@ -65,7 +95,9 @@ class GameConfig {
   static const int maxCloudsPerGroup = 2; // must stay below laneCount
   static const double cloudWidth = 160;
   static const double cloudHeight = 52;
-  static const double scrollSpeed = 220;
+  static const double scrollSpeed = 220; // base speed at score 0
+  static const double scrollSpeedPerPoint = 1;
+  static const double maxScrollSpeed = 260;
   static const double spawnSpacing = 460;
   static const double firstGroupDistance = 300;
 
@@ -83,12 +115,4 @@ class GameConfig {
   static const double scoreTextY = 12;
   static const double bestFontSize = 18;
   static const double bestTextY = scoreTextY + scoreFontSize + 6;
-  static const double gameOverFontSize = 28;
-  static const double gameOverTextX = worldWidth / 2; // centre-anchored
-  static const double gameOverTextY = 110;
-  static const double gameOverLineSpacing = 40;
-
-  // Game-over buttons (Flutter overlay): top edge as a fraction of screen
-  // height, placed below the game-over text (ends near world y 260 of 400).
-  static const double gameOverActionsTopFraction = 0.7;
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'mute_button.dart';
+import 'glass_panel.dart';
+import 'pill_button.dart';
+import 'settings_toggles.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({
@@ -10,16 +12,32 @@ class MainMenu extends StatelessWidget {
     required this.onPlay,
     required this.muted,
     required this.onToggleMute,
+    required this.vibration,
+    required this.onToggleVibration,
   });
 
   final int highScore;
   final VoidCallback onPlay;
   final ValueListenable<bool> muted;
   final VoidCallback onToggleMute;
+  final ValueListenable<bool> vibration;
+  final VoidCallback onToggleVibration;
 
-  static const _shadows = [
+  static const _shadow = [
     Shadow(color: Color(0x66000000), blurRadius: 8, offset: Offset(0, 3)),
   ];
+
+  static TextStyle _title(Color color) => TextStyle(
+    color: color,
+    fontSize: 48,
+    height: 1,
+    fontWeight: FontWeight.w900,
+    letterSpacing: 8,
+    shadows: const [
+      Shadow(color: Color(0xFFB71C1C), offset: Offset(0, 4)),
+      ..._shadow,
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -30,83 +48,66 @@ class MainMenu extends StatelessWidget {
             alignment: Alignment.topRight,
             child: Padding(
               padding: const EdgeInsets.all(8),
-              child: MuteButton(muted: muted, onToggle: onToggleMute),
-            ),
-          ),
-          _content(),
-        ],
-      ),
-    );
-  }
-
-  Widget _content() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'FRIGHT',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 60,
-              height: 1,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 8,
-              shadows: [
-                Shadow(color: Color(0xFFB71C1C), offset: Offset(0, 4)),
-                ..._shadows,
-              ],
-            ),
-          ),
-          const Text(
-            'FLIGHT',
-            style: TextStyle(
-              color: Color(0xFFFFEB3B),
-              fontSize: 60,
-              height: 1.05,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 8,
-              shadows: [
-                Shadow(color: Color(0xFFB71C1C), offset: Offset(0, 4)),
-                ..._shadows,
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'BEST  $highScore',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 3,
+              child: SettingsToggles(
+                muted: muted,
+                onToggleMute: onToggleMute,
+                vibration: vibration,
+                onToggleVibration: onToggleVibration,
               ),
             ),
           ),
-          const SizedBox(height: 22),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFD32F2F),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              elevation: 4,
-              textStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 4,
+          // FittedBox shrinks the card on short screens so it never overflows.
+          Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: GlassPanel(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('FRIGHT', style: _title(Colors.white)),
+                    const SizedBox(height: 4),
+                    Text('FLIGHT', style: _title(const Color(0xFFFFEB3B))),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.emoji_events,
+                            color: Color(0xFFFFD54F),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'BEST  $highScore',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    PillButton(
+                      label: 'Play',
+                      icon: Icons.play_arrow_rounded,
+                      onPressed: onPlay,
+                    ),
+                  ],
+                ),
               ),
             ),
-            onPressed: onPlay,
-            child: const Text('PLAY'),
           ),
         ],
       ),

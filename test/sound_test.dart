@@ -21,7 +21,7 @@ Future<FrightFlightGame> _launch(
     FrightFlightGame.mainMenuOverlay,
     FrightFlightGame.pauseButtonOverlay,
     FrightFlightGame.pauseMenuOverlay,
-    FrightFlightGame.gameOverActionsOverlay,
+    FrightFlightGame.gameOverPanelOverlay,
   ];
   await t.pumpWidget(
     MaterialApp(

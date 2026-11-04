@@ -15,11 +15,13 @@ import 'components/score_hud.dart';
 import 'components/smoke_trail.dart';
 import 'logic/cloud_field.dart';
 import 'logic/collision_rules.dart';
+import 'logic/difficulty_curve.dart';
 import 'logic/lane_picker.dart';
 import 'logic/plane_body.dart';
 import 'logic/run_controller.dart';
 import 'logic/score_keeper.dart';
 import '../services/audio_service.dart';
+import '../services/haptics_service.dart';
 import '../services/storage_service.dart';
 
 class FrightFlightGame extends FlameGame with TapCallbacks {
@@ -27,6 +29,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     Random? random,
     StorageService? storage,
     AudioService? audio,
+    HapticsService? haptics,
     Duration? minLoadTime,
   }) : super(
          camera: CameraComponent.withFixedResolution(
@@ -38,12 +41,14 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     _storage = storage ?? SharedPreferencesStorageService();
     _score = ScoreKeeper(_storage);
     _audio = audio ?? FlameAudioService();
+    _haptics = haptics ?? FlutterHapticsService();
     _minLoadTime = minLoadTime ?? GameConfig.loadingMinDuration;
     _run = RunController(
       onStart: () {},
       onFlap: () {
         _body.flap();
         _audio.playFlap();
+        _haptics.flap();
       },
       onReset: _reset,
     );
@@ -55,20 +60,29 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   late final ScoreKeeper _score;
   late final StorageService _storage;
   late final AudioService _audio;
+  late final HapticsService _haptics;
   late final Duration _minLoadTime;
 
   /// Mute setting, shared by the menu buttons.
   final ValueNotifier<bool> muted = ValueNotifier(false);
+
+  /// Vibration setting (on by default), shared by the menu buttons.
+  final ValueNotifier<bool> vibration = ValueNotifier(true);
   final Map<Object, CloudComponent> _cloudComponents = {};
   late final SmokeTrail _smoke;
 
   RunState get runState => _run.state;
   int get highScore => _score.highScore;
+  int get score => _score.score;
+  bool get newBest => _score.newBest;
+
+  /// True once the restart delay has passed in the game-over state.
+  final ValueNotifier<bool> restartReady = ValueNotifier(false);
 
   static const mainMenuOverlay = 'mainMenu';
   static const pauseButtonOverlay = 'pauseButton';
   static const pauseMenuOverlay = 'pauseMenu';
-  static const gameOverActionsOverlay = 'gameOverActions';
+  static const gameOverPanelOverlay = 'gameOverPanel';
 
   void play() => _transition(_run.play);
   void pause() => _transition(_run.pause);
@@ -107,6 +121,14 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     });
   }
 
+  void toggleVibration() {
+    vibration.value = !vibration.value;
+    _haptics.setEnabled(vibration.value);
+    _storage.writeHaptics(vibration.value).catchError((_) {
+      // The in-memory setting stays for this session.
+    });
+  }
+
   /// Maps the run state to the overlay set. Idempotent; call after every
   /// transition so overlays cannot drift from state.
   void _syncOverlays() {
@@ -114,13 +136,13 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
       if (_run.state == RunState.menu) mainMenuOverlay,
       if (_run.state == RunState.playing) pauseButtonOverlay,
       if (_run.state == RunState.paused) pauseMenuOverlay,
-      if (_run.canRestart) gameOverActionsOverlay,
+      if (_run.state == RunState.gameOver) gameOverPanelOverlay,
     };
     for (final name in const [
       mainMenuOverlay,
       pauseButtonOverlay,
       pauseMenuOverlay,
-      gameOverActionsOverlay,
+      gameOverPanelOverlay,
     ]) {
       if (wanted.contains(name)) {
         if (!overlays.isActive(name)) overlays.add(name);
@@ -156,6 +178,12 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
       } catch (_) {
         muted.value = false;
       }
+      try {
+        vibration.value = await _storage.readHaptics() ?? true;
+      } catch (_) {
+        vibration.value = true;
+      }
+      _haptics.setEnabled(vibration.value);
       _audio.setMuted(muted.value);
       await _audio.preload(); // never throws
     } catch (_) {
@@ -163,8 +191,14 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     }
     camera.viewfinder.anchor = Anchor.topLeft;
     bool running() => _run.state == RunState.playing;
-    world.add(BackgroundComponent(isRunning: running));
-    _smoke = SmokeTrail(_body, isRunning: running);
+    world.add(
+      BackgroundComponent(isRunning: running, score: () => _score.score),
+    );
+    _smoke = SmokeTrail(
+      _body,
+      isRunning: running,
+      speed: () => DifficultyCurve.speedFor(_score.score),
+    );
     world.add(_smoke);
     world.add(PlaneComponent(_body, isRunning: running));
     world.add(ScoreHud(score: _score, runState: () => _run.state));
@@ -178,10 +212,11 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void update(double dt) {
     final step = min(dt, GameConfig.maxFrameDelta);
     _run.update(step);
-    if (_run.state == RunState.gameOver) _syncOverlays();
+    restartReady.value = _run.canRestart;
     if (_run.state == RunState.playing) {
       _body.step(step);
-      for (final spec in _field.step(step)) {
+      final speed = DifficultyCurve.speedFor(_score.score);
+      for (final spec in _field.step(step, speed: speed)) {
         final c = CloudComponent(spec);
         _cloudComponents[spec] = c;
         world.add(c);
@@ -194,10 +229,14 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
       if (CollisionRules.hits(_body.y, _field.clouds)) {
         _transition(_run.crash); // stops the music
         _audio.playCrash();
+        _haptics.crash();
         // Not awaited: the write must not delay game over (errors are caught).
         unawaited(_score.finishRun());
       } else {
-        if (_score.onCloudsAdvanced(_field.clouds) > 0) _audio.playScore();
+        if (_score.onCloudsAdvanced(_field.clouds) > 0) {
+          _audio.playScore();
+          _haptics.score();
+        }
       }
     }
     super.update(step);

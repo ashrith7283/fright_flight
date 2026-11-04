@@ -10,11 +10,16 @@ abstract class StorageService {
   /// Returns null when nothing has been stored.
   Future<bool?> readMuted();
   Future<void> writeMuted(bool value);
+
+  /// Returns null when nothing has been stored (vibration defaults to on).
+  Future<bool?> readHaptics();
+  Future<void> writeHaptics(bool value);
 }
 
 class SharedPreferencesStorageService implements StorageService {
   static const _highScoreKey = 'high_score';
   static const _mutedKey = 'muted';
+  static const _hapticsKey = 'haptics';
 
   // Fetched per call (the instance is cached by the plugin) so a failing
   // lookup is an ordinary exception, not a launch crash.
@@ -40,5 +45,17 @@ class SharedPreferencesStorageService implements StorageService {
   Future<void> writeMuted(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_mutedKey, value);
+  }
+
+  @override
+  Future<bool?> readHaptics() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hapticsKey);
+  }
+
+  @override
+  Future<void> writeHaptics(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hapticsKey, value);
   }
 }

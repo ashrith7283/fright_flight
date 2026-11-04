@@ -5,7 +5,6 @@ import 'package:fright_flight/game/fright_flight_game.dart';
 import 'package:fright_flight/game/logic/run_controller.dart';
 import 'package:fright_flight/game/logic/score_keeper.dart';
 import 'package:fright_flight/services/audio_service.dart';
-import 'package:fright_flight/ui/game_over_actions.dart';
 import 'package:fright_flight/ui/main_menu.dart';
 import 'package:fright_flight/ui/mute_button.dart';
 import 'package:fright_flight/ui/pause_button.dart';
@@ -26,6 +25,8 @@ void main() {
           onPlay: () => played++,
           muted: ValueNotifier(false),
           onToggleMute: () => toggled++,
+          vibration: ValueNotifier(true),
+          onToggleVibration: () {},
         ),
       ),
     );
@@ -41,7 +42,7 @@ void main() {
   testWidgets('pause button and pause menu call their callbacks', (t) async {
     var paused = 0, resumed = 0, menu = 0;
     await t.pumpWidget(_wrap(PauseButton(onPause: () => paused++)));
-    await t.tap(find.byIcon(Icons.pause));
+    await t.tap(find.byIcon(Icons.pause_rounded));
     expect(paused, 1);
 
     await t.pumpWidget(
@@ -51,25 +52,15 @@ void main() {
           onMenu: () => menu++,
           muted: ValueNotifier(true),
           onToggleMute: () {},
+          vibration: ValueNotifier(true),
+          onToggleVibration: () {},
         ),
       ),
     );
     expect(find.byIcon(Icons.volume_off), findsOneWidget);
-    await t.tap(find.text('Resume'));
-    await t.tap(find.text('Menu'));
+    await t.tap(find.text('RESUME'));
+    await t.tap(find.text('MENU'));
     expect((resumed, menu), (1, 1));
-  });
-
-  testWidgets('game-over actions call their callbacks', (t) async {
-    var restarted = 0, menu = 0;
-    await t.pumpWidget(
-      _wrap(
-        GameOverActions(onRestart: () => restarted++, onMenu: () => menu++),
-      ),
-    );
-    await t.tap(find.text('Restart'));
-    await t.tap(find.text('Menu'));
-    expect((restarted, menu), (1, 1));
   });
 
   testWidgets('game launches in menu; play, pause, resume, toMenu', (t) async {
@@ -83,7 +74,7 @@ void main() {
       FrightFlightGame.mainMenuOverlay,
       FrightFlightGame.pauseButtonOverlay,
       FrightFlightGame.pauseMenuOverlay,
-      FrightFlightGame.gameOverActionsOverlay,
+      FrightFlightGame.gameOverPanelOverlay,
     ];
     await t.pumpWidget(
       GameWidget<FrightFlightGame>(

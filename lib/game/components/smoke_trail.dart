@@ -8,10 +8,12 @@ import '../logic/smoke_puffs.dart';
 
 /// Smoke behind the plane. Emits and ages puffs only while [isRunning].
 class SmokeTrail extends Component {
-  SmokeTrail(this.body, {required this._isRunning}) : super(priority: 1);
+  SmokeTrail(this.body, {required this._isRunning, required this._speed})
+    : super(priority: 1);
 
   final PlaneBody body;
   final bool Function() _isRunning;
+  final double Function() _speed;
   final SmokePuffs _puffs = SmokePuffs();
   final Paint _paint = Paint();
 
@@ -22,6 +24,7 @@ class SmokeTrail extends Component {
     if (!_isRunning()) return;
     _puffs.step(
       dt,
+      speed: _speed(),
       spawnX: GameConfig.planeStartX + 2,
       spawnY: body.y + GameConfig.planeHeight * 0.55,
     );

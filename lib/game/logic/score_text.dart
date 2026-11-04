@@ -8,10 +8,4 @@ class ScoreText {
   /// rises as the player passes the stored record.
   static String best(int score, int highScore) =>
       'Best: ${score > highScore ? score : highScore}';
-
-  static List<String> gameOver({
-    required int score,
-    required int highScore,
-    required bool newBest,
-  }) => ['Score: $score', 'Best: $highScore', if (newBest) 'New best!'];
 }

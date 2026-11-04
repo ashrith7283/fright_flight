@@ -19,9 +19,11 @@ class CloudField {
     _nextSpawnAt = GameConfig.firstGroupDistance;
   }
 
-  /// Advances by [dt]. Returns clouds spawned during this step.
-  List<CloudSpec> step(double dt) {
-    final dx = GameConfig.scrollSpeed * dt;
+  /// Advances by [dt] at [speed] (the current scroll speed). Spawn spacing is
+  /// measured in distance, so it stays fixed as the speed ramps up.
+  /// Returns clouds spawned during this step.
+  List<CloudSpec> step(double dt, {double speed = GameConfig.scrollSpeed}) {
+    final dx = speed * dt;
     _scrolled += dx;
     for (final c in clouds) {
       c.x -= dx;

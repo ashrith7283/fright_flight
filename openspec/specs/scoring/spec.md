@@ -151,7 +151,7 @@ While the game is in the playing state, the game SHALL display the current score
 - **THEN** the best score is shown by the menu only, not duplicated in the game window
 
 ### Requirement: Game over shows score, high score and new best
-In the game-over state, the game SHALL display the final score and the high score as plain text. It SHALL additionally display a "new best" indication if and only if the final score beat the previously stored high score in that run.
+In the game-over state, the game SHALL display the final score and the high score in the game-over panel. It SHALL additionally display a "new best" indication if and only if the final score beat the previously stored high score in that run.
 
 #### Scenario: Game over without new best
 - **WHEN** a run ends with a score not above the previous high score

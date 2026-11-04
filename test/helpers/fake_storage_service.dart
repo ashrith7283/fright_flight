@@ -38,4 +38,22 @@ class FakeStorageService implements StorageService {
     mutedWrites.add(value);
     storedMuted = value;
   }
+
+  bool? storedHaptics;
+  bool failHapticsReads = false;
+  bool failHapticsWrites = false;
+  final List<bool> hapticsWrites = [];
+
+  @override
+  Future<bool?> readHaptics() async {
+    if (failHapticsReads) throw Exception('read failed');
+    return storedHaptics;
+  }
+
+  @override
+  Future<void> writeHaptics(bool value) async {
+    if (failHapticsWrites) throw Exception('write failed');
+    hapticsWrites.add(value);
+    storedHaptics = value;
+  }
 }

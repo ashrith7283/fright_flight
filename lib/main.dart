@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'core/game_config.dart';
 import 'game/fright_flight_game.dart';
 import 'game/logic/back_action.dart';
-import 'ui/game_over_actions.dart';
+import 'ui/game_over_panel.dart';
 import 'ui/loading_screen.dart';
 import 'ui/main_menu.dart';
 import 'ui/pause_button.dart';
@@ -64,6 +64,8 @@ class _FrightFlightAppState extends State<FrightFlightApp> {
               onPlay: g.play,
               muted: g.muted,
               onToggleMute: g.toggleMute,
+              vibration: g.vibration,
+              onToggleVibration: g.toggleVibration,
             ),
             FrightFlightGame.pauseButtonOverlay: (_, g) =>
                 PauseButton(onPause: g.pause),
@@ -72,9 +74,17 @@ class _FrightFlightAppState extends State<FrightFlightApp> {
               onMenu: g.toMenu,
               muted: g.muted,
               onToggleMute: g.toggleMute,
+              vibration: g.vibration,
+              onToggleVibration: g.toggleVibration,
             ),
-            FrightFlightGame.gameOverActionsOverlay: (_, g) =>
-                GameOverActions(onRestart: g.restart, onMenu: g.toMenu),
+            FrightFlightGame.gameOverPanelOverlay: (_, g) => GameOverPanel(
+              score: g.score,
+              best: g.highScore,
+              newBest: g.newBest,
+              restartReady: g.restartReady,
+              onRestart: g.restart,
+              onMenu: g.toMenu,
+            ),
           },
         ),
       ),

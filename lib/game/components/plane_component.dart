@@ -20,6 +20,7 @@ class PlaneComponent extends PositionComponent {
   final PlaneBody body;
   final bool Function() _isRunning;
   double _spin = 0;
+  double _tilt = 0; // eased, so taps do not snap the nose
 
   static final _fuselage = Paint()..color = GameConfig.planeBodyColor;
   static final _wing = Paint()..color = GameConfig.planeWingColor;
@@ -35,18 +36,19 @@ class PlaneComponent extends PositionComponent {
   @override
   void update(double dt) {
     position.y = body.y;
+    final target =
+        (body.velocity / GameConfig.maxFallSpeed).clamp(-1.0, 1.0) *
+        GameConfig.planeMaxTilt;
+    _tilt += (target - _tilt) * (1 - exp(-GameConfig.planeTiltEaseRate * dt));
     if (_isRunning()) _spin += GameConfig.propellerSpinRate * dt;
   }
 
   @override
   void render(Canvas canvas) {
     final w = size.x, h = size.y;
-    final tilt =
-        (body.velocity / GameConfig.maxFallSpeed).clamp(-1.0, 1.0) *
-        GameConfig.planeMaxTilt;
     canvas.save();
     canvas.translate(w / 2, h / 2);
-    canvas.rotate(tilt);
+    canvas.rotate(_tilt);
     canvas.translate(-w / 2, -h / 2);
 
     // Tail fin.

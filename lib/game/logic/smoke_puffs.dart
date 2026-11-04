@@ -15,7 +15,12 @@ class SmokePuffs {
   final List<SmokePuff> puffs = [];
   double _sinceSpawn = 0;
 
-  void step(double dt, {required double spawnX, required double spawnY}) {
+  void step(
+    double dt, {
+    required double spawnX,
+    required double spawnY,
+    double speed = GameConfig.scrollSpeed,
+  }) {
     _sinceSpawn += dt;
     while (_sinceSpawn >= GameConfig.smokeSpawnInterval) {
       _sinceSpawn -= GameConfig.smokeSpawnInterval;
@@ -23,7 +28,7 @@ class SmokePuffs {
     }
     for (final p in puffs) {
       p.age += dt;
-      p.x -= GameConfig.scrollSpeed * dt;
+      p.x -= speed * dt;
     }
     puffs.removeWhere((p) => p.age >= GameConfig.smokeLifetime);
   }

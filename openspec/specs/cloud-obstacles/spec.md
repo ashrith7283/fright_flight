@@ -29,15 +29,31 @@ The play area between the ceiling and the ground SHALL be divided into three equ
 - **THEN** their vertical centres take exactly three distinct values, one per lane
 
 ### Requirement: Clouds scroll toward the plane
-During a run, clouds SHALL enter from the right edge of the screen and move left at the configured scroll speed.
+During a run, clouds SHALL enter from the right edge of the screen and move left at the current scroll speed. The current scroll speed SHALL start at the configured base scroll speed and increase by a configured amount for each point scored, never exceeding the configured maximum scroll speed. The spawn spacing between groups SHALL NOT change as the speed increases.
 
 #### Scenario: Cloud scrolls at constant speed
-- **WHEN** a run is in progress
-- **THEN** every cloud moves left at the configured scroll speed, independent of frame rate
+- **WHEN** a run is in progress and the score is unchanged
+- **THEN** every cloud moves left at the current scroll speed, independent of frame rate, and at the configured base scroll speed when the score is 0
+
+#### Scenario: Speed rises with score
+- **WHEN** the score increases during a run
+- **THEN** clouds move faster than at the previous score, by the configured amount per point
+
+#### Scenario: Speed is capped
+- **WHEN** the score is high enough that the ramp would exceed the maximum
+- **THEN** clouds move at the configured maximum scroll speed and no faster
+
+#### Scenario: Speed resets each run
+- **WHEN** a new run starts after a restart or return to the menu
+- **THEN** the scroll speed is the base scroll speed again
 
 #### Scenario: Cloud removed after leaving the screen
 - **WHEN** a cloud has moved fully past the left edge of the screen
 - **THEN** it is removed and no longer takes part in collisions
+
+#### Scenario: Passage stays possible at maximum speed
+- **WHEN** the scroll speed is at its maximum
+- **THEN** every group can still be passed by flying through a free lane, or over or under the clouds
 
 ### Requirement: Cloud groups are spawned at fixed horizontal spacing
 Clouds SHALL be spawned in groups. Every cloud SHALL belong to exactly one group, and all clouds of a group SHALL share one identity that is unique among groups within a run and stays the same for the group's lifetime, so a group can be recognised as a single unit. The horizontal distance between consecutive groups SHALL equal the configured spawn spacing, and the first group SHALL appear a configured distance after the run starts.

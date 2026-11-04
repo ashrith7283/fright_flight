@@ -6,8 +6,9 @@ import '../logic/run_controller.dart';
 import '../logic/score_keeper.dart';
 import '../logic/score_text.dart';
 
-/// Plain-text score readout. Hidden in menu and ready, live score while playing or paused,
-/// score / best / "new best" on game over. Holds no score state itself.
+/// Plain-text score readout. Best only in ready; live score and best while
+/// playing or paused; nothing in menu and game over (the game-over panel
+/// shows the result). Holds no score state itself.
 class ScoreHud extends PositionComponent {
   ScoreHud({required this.score, required this.runState}) : super(priority: 10);
 
@@ -19,12 +20,14 @@ class ScoreHud extends PositionComponent {
       color: GameConfig.scoreTextColor,
       fontSize: size,
       fontWeight: FontWeight.bold,
+      shadows: const [
+        Shadow(color: Color(0x99000000), blurRadius: 4, offset: Offset(0, 2)),
+      ],
     ),
   );
 
   static final _playingPaint = _paint(GameConfig.scoreFontSize);
   static final _bestPaint = _paint(GameConfig.bestFontSize);
-  static final _gameOverPaint = _paint(GameConfig.gameOverFontSize);
 
   @override
   void render(Canvas canvas) {
@@ -42,22 +45,7 @@ class ScoreHud extends PositionComponent {
         );
         _renderBest(canvas, GameConfig.bestTextY);
       case RunState.gameOver:
-        final lines = ScoreText.gameOver(
-          score: score.score,
-          highScore: score.highScore,
-          newBest: score.newBest,
-        );
-        for (var i = 0; i < lines.length; i++) {
-          _gameOverPaint.render(
-            canvas,
-            lines[i],
-            Vector2(
-              GameConfig.gameOverTextX,
-              GameConfig.gameOverTextY + i * GameConfig.gameOverLineSpacing,
-            ),
-            anchor: Anchor.topCenter,
-          );
-        }
+        return; // shown by the game-over panel
     }
   }
 

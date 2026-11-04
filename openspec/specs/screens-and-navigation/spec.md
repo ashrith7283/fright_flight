@@ -63,11 +63,19 @@ If the app leaves the foreground while the game is in the playing state, the gam
 - **THEN** the state is unchanged on return
 
 ### Requirement: Game-over actions
-In the game-over state, once the restart delay has elapsed, Restart and Menu buttons SHALL be shown with the game-over score text. Restart SHALL reset the game to the ready state, as a tap does today. Menu SHALL go to the main menu.
+In the game-over state, a game-over panel SHALL be shown immediately with the score information. Restart and Menu buttons SHALL be shown in the panel but SHALL be disabled until the restart delay has elapsed, and enabled after. Restart SHALL reset the game to the ready state, as a tap does today. Menu SHALL go to the main menu.
+
+#### Scenario: Panel appears at once
+- **WHEN** the game enters the game-over state
+- **THEN** the game-over panel with the score information is shown without waiting for the restart delay
 
 #### Scenario: Buttons appear after the delay
-- **WHEN** the game enters the game-over state and the restart delay elapses
-- **THEN** the Restart and Menu buttons are shown
+- **WHEN** the restart delay elapses in the game-over state
+- **THEN** the Restart and Menu buttons become enabled in the panel
+
+#### Scenario: Buttons disabled before the delay
+- **WHEN** the player presses a game-over button before the restart delay has elapsed
+- **THEN** nothing happens
 
 #### Scenario: Restart button
 - **WHEN** the player presses Restart
@@ -75,7 +83,7 @@ In the game-over state, once the restart delay has elapsed, Restart and Menu but
 
 #### Scenario: Menu button
 - **WHEN** the player presses Menu on game over
-- **THEN** the main menu is shown and the game-over text and buttons are gone
+- **THEN** the main menu is shown and the game-over panel is gone
 
 ### Requirement: Leaving a run for the menu
 Pressing Menu from the pause overlay SHALL abandon the current run, reset the scene and show the main menu. An abandoned run SHALL NOT change the high score.
