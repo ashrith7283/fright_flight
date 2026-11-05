@@ -63,6 +63,7 @@ class _FrightFlightAppState extends State<FrightFlightApp> {
           overlayBuilderMap: {
             FrightFlightGame.mainMenuOverlay: (_, g) => MainMenu(
               highScore: g.highScore,
+              runsPlayed: g.runsPlayed,
               onPlay: g.play,
               muted: g.muted,
               onToggleMute: g.toggleMute,

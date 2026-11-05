@@ -15,6 +15,29 @@ class ScoreHud extends PositionComponent {
   final ScoreKeeper score;
   final RunState Function() runState;
 
+  int _lastScore = 0;
+  double _popT = GameConfig.scorePopDuration; // time since the last point
+
+  /// Current size factor of the live score: [GameConfig.scorePopScale] right
+  /// after a point, easing back to 1 over [GameConfig.scorePopDuration].
+  double get popScale {
+    if (_popT >= GameConfig.scorePopDuration) return 1;
+    final left = 1 - _popT / GameConfig.scorePopDuration;
+    return 1 + (GameConfig.scorePopScale - 1) * left * left;
+  }
+
+  @override
+  void update(double dt) {
+    final now = score.score;
+    if (now > _lastScore && runState() == RunState.playing) {
+      _popT = 0; // a new point restarts the pop from its peak
+    } else {
+      _popT = (_popT + dt).clamp(0, GameConfig.scorePopDuration);
+    }
+    if (now < _lastScore) _popT = GameConfig.scorePopDuration; // run reset
+    _lastScore = now;
+  }
+
   static TextPaint _paint(double size) => TextPaint(
     style: TextStyle(
       color: GameConfig.scoreTextColor,
@@ -38,11 +61,19 @@ class ScoreHud extends PositionComponent {
         _renderBest(canvas, GameConfig.scoreTextY);
       case RunState.playing:
       case RunState.paused:
+        // Pop around the left middle of the text so it grows in place.
+        const pivotX = GameConfig.scoreTextX;
+        const pivotY = GameConfig.scoreTextY + GameConfig.scoreFontSize / 2;
+        canvas.save();
+        canvas.translate(pivotX, pivotY);
+        canvas.scale(popScale);
+        canvas.translate(-pivotX, -pivotY);
         _playingPaint.render(
           canvas,
           ScoreText.playing(score.score),
           Vector2(GameConfig.scoreTextX, GameConfig.scoreTextY),
         );
+        canvas.restore();
         _renderBest(canvas, GameConfig.bestTextY);
       case RunState.gameOver:
         return; // shown by the game-over panel

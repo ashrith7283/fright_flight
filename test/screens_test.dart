@@ -5,7 +5,10 @@ import 'package:fright_flight/game/fright_flight_game.dart';
 import 'package:fright_flight/game/logic/run_controller.dart';
 import 'package:fright_flight/game/logic/score_keeper.dart';
 import 'package:fright_flight/services/audio_service.dart';
+import 'package:fright_flight/game/logic/medals.dart';
 import 'package:fright_flight/ui/main_menu.dart';
+import 'package:fright_flight/core/game_config.dart';
+import 'package:fright_flight/ui/medal_badge.dart';
 import 'package:fright_flight/ui/mute_button.dart';
 import 'package:fright_flight/ui/pause_button.dart';
 import 'package:fright_flight/ui/pause_menu.dart';
@@ -37,6 +40,37 @@ void main() {
     expect(played, 1);
     await t.tap(find.byIcon(Icons.volume_up));
     expect(toggled, 1);
+  });
+
+  group('menu stats', () {
+    Widget menu({required int best, required int runs}) => _wrap(
+      MainMenu(
+        highScore: best,
+        runsPlayed: runs,
+        onPlay: () {},
+        muted: ValueNotifier(false),
+        onToggleMute: () {},
+        vibration: ValueNotifier(true),
+        onToggleVibration: () {},
+      ),
+    );
+
+    testWidgets('fresh install: 0 runs and no medal', (t) async {
+      await t.pumpWidget(menu(best: 0, runs: 0));
+      expect(find.text('RUNS  0'), findsOneWidget);
+      expect(find.byType(MedalBadge), findsNothing);
+    });
+
+    testWidgets('gold high score shows the gold medal and run count', (
+      t,
+    ) async {
+      await t.pumpWidget(menu(best: GameConfig.goldScore, runs: 42));
+      expect(find.text('RUNS  42'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is MedalBadge && w.medal == Medal.gold),
+        findsOneWidget,
+      );
+    });
   });
 
   testWidgets('pause button and pause menu call their callbacks', (t) async {

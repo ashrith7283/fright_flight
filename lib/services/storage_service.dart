@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persistence for the high score. Implementations may throw; callers decide
+/// Persistence for the high score, settings and runs played. Implementations may throw; callers decide
 /// how to degrade (see ScoreKeeper).
 abstract class StorageService {
   /// Returns null when nothing has been stored.
@@ -14,12 +14,17 @@ abstract class StorageService {
   /// Returns null when nothing has been stored (vibration defaults to on).
   Future<bool?> readHaptics();
   Future<void> writeHaptics(bool value);
+
+  /// Returns null when nothing has been stored.
+  Future<int?> readRunsPlayed();
+  Future<void> writeRunsPlayed(int value);
 }
 
 class SharedPreferencesStorageService implements StorageService {
   static const _highScoreKey = 'high_score';
   static const _mutedKey = 'muted';
   static const _hapticsKey = 'haptics';
+  static const _runsPlayedKey = 'runs_played';
 
   // Fetched per call (the instance is cached by the plugin) so a failing
   // lookup is an ordinary exception, not a launch crash.
@@ -57,5 +62,17 @@ class SharedPreferencesStorageService implements StorageService {
   Future<void> writeHaptics(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_hapticsKey, value);
+  }
+
+  @override
+  Future<int?> readRunsPlayed() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_runsPlayedKey); // throws on a wrong-typed value
+  }
+
+  @override
+  Future<void> writeRunsPlayed(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_runsPlayedKey, value);
   }
 }

@@ -28,7 +28,7 @@ class CloudComponent extends PositionComponent {
   ];
 
   @override
-  void update(double dt) => position.x = spec.x;
+  void update(double dt) => position.setValues(spec.x, spec.bounds.top);
 
   @override
   void render(Canvas canvas) {

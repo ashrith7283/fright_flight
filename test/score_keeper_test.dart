@@ -173,4 +173,74 @@ void main() {
       expect(keeper.newBest, isFalse);
     });
   });
+
+  group('runs played', () {
+    test('loads 0 when missing, negative or unreadable', () async {
+      await keeper.load();
+      expect(keeper.runsPlayed, 0);
+      storage.storedRuns = -4;
+      await keeper.load();
+      expect(keeper.runsPlayed, 0);
+      storage
+        ..storedRuns = 9
+        ..failRunsReads = true;
+      await keeper.load();
+      expect(keeper.runsPlayed, 0);
+    });
+
+    test('loads a stored count independently of the high score', () async {
+      storage
+        ..storedRuns = 9
+        ..failReads = true; // high score read fails
+      await keeper.load();
+      expect(keeper.runsPlayed, 9);
+      expect(keeper.highScore, 0);
+    });
+
+    test('each finished run counts once and is saved once', () async {
+      storage.storedRuns = 4;
+      await keeper.load();
+      await keeper.finishRun();
+      await keeper.finishRun(); // same run again: ignored
+      expect(keeper.runsPlayed, 5);
+      expect(storage.runsWrites, [5]);
+      keeper.reset();
+      await keeper.finishRun(); // a score of 0 still counts
+      expect(keeper.runsPlayed, 6);
+      expect(storage.runsWrites, [5, 6]);
+    });
+
+    test('an abandoned run is not counted', () async {
+      await keeper.load();
+      keeper.onCloudsAdvanced([cloud(0, edge - 1)]);
+      keeper.reset(); // what returning to the menu from pause does
+      expect(keeper.runsPlayed, 0);
+      expect(storage.runsWrites, isEmpty);
+    });
+
+    test(
+      'a failed write keeps the in-memory count and the high score save',
+      () async {
+        await keeper.load();
+        storage.failRunsWrites = true;
+        keeper.onCloudsAdvanced([cloud(0, edge - 1)]);
+        await keeper.finishRun();
+        expect(keeper.runsPlayed, 1);
+        expect(storage.writes, [1]); // high score still saved
+        storage.failRunsWrites = false;
+        keeper.reset();
+        await keeper.finishRun();
+        expect(storage.runsWrites, [2]);
+      },
+    );
+
+    test('newBest is set before any write completes', () async {
+      await keeper.load();
+      keeper.onCloudsAdvanced([cloud(0, edge - 1)]);
+      final done = keeper.finishRun(); // not awaited, as in the game
+      expect(keeper.newBest, isTrue);
+      expect(keeper.runsPlayed, 1);
+      await done;
+    });
+  });
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fright_flight/core/game_config.dart';
 import 'package:fright_flight/ui/game_over_panel.dart';
 import 'package:fright_flight/ui/glass_icon_button.dart';
 import 'package:fright_flight/ui/loading_screen.dart';
 import 'package:fright_flight/ui/main_menu.dart';
+import 'package:fright_flight/ui/medal_badge.dart';
 import 'package:fright_flight/ui/pause_menu.dart';
 import 'package:fright_flight/ui/pill_button.dart';
 import 'package:fright_flight/ui/settings_toggles.dart';
@@ -189,6 +191,48 @@ void _noUnderlineTests() {
       );
       final style = DefaultTextStyle.of(t.element(find.text('FRIGHT'))).style;
       expect(style.decoration ?? TextDecoration.none, TextDecoration.none);
+    });
+  });
+
+  group('medals on game over', () {
+    Future<void> pumpPanel(WidgetTester t, int score) async {
+      await t.pumpWidget(
+        _panel(ready: ValueNotifier(true), score: score, best: score),
+      );
+      await t.pump(const Duration(milliseconds: 400));
+    }
+
+    testWidgets('no medal: hint for bronze only', (t) async {
+      await pumpPanel(t, GameConfig.bronzeScore - 3);
+      expect(find.byType(MedalBadge), findsNothing);
+      expect(find.text('3 MORE FOR BRONZE'), findsOneWidget);
+    });
+
+    testWidgets('mid band: bronze medal and points to silver', (t) async {
+      await pumpPanel(t, GameConfig.bronzeScore + 2);
+      expect(find.text('BRONZE'), findsOneWidget);
+      expect(
+        find.text(
+          '${GameConfig.silverScore - GameConfig.bronzeScore - 2} '
+          'MORE FOR SILVER',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('platinum: medal and no hint', (t) async {
+      await pumpPanel(t, GameConfig.platinumScore + 7);
+      expect(find.text('PLATINUM'), findsOneWidget);
+      expect(find.textContaining('MORE FOR'), findsNothing);
+    });
+
+    testWidgets('panel with a medal fits a short landscape screen', (t) async {
+      t.view.physicalSize = const Size(640, 300);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.reset);
+      await pumpPanel(t, GameConfig.goldScore + 1);
+      expect(t.takeException(), isNull);
+      expect(find.text('GOLD'), findsOneWidget);
     });
   });
 }

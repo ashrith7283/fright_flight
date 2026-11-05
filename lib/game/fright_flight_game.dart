@@ -4,19 +4,24 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/foundation.dart' show ValueNotifier;
-import 'package:flutter/widgets.dart' show AppLifecycleState;
+import 'package:flutter/foundation.dart' show ValueNotifier, visibleForTesting;
+import 'package:flutter/widgets.dart' show AppLifecycleState, MediaQuery;
 
 import '../core/game_config.dart';
 import 'components/background_component.dart';
 import 'components/cloud_component.dart';
+import 'components/crash_flash.dart';
+import 'components/near_miss_label.dart';
 import 'components/plane_component.dart';
+import 'components/ready_prompt.dart';
 import 'components/score_hud.dart';
 import 'components/smoke_trail.dart';
 import 'logic/cloud_field.dart';
 import 'logic/collision_rules.dart';
 import 'logic/difficulty_curve.dart';
 import 'logic/lane_picker.dart';
+import 'logic/crash_effects.dart';
+import 'logic/near_miss_tracker.dart';
 import 'logic/plane_body.dart';
 import 'logic/run_controller.dart';
 import 'logic/score_keeper.dart';
@@ -31,6 +36,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     AudioService? audio,
     HapticsService? haptics,
     Duration? minLoadTime,
+    bool Function()? reducedMotion,
   }) : super(
          camera: CameraComponent.withFixedResolution(
            width: GameConfig.worldWidth,
@@ -43,6 +49,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     _audio = audio ?? FlameAudioService();
     _haptics = haptics ?? FlutterHapticsService();
     _minLoadTime = minLoadTime ?? GameConfig.loadingMinDuration;
+    _reducedMotion = reducedMotion ?? _systemReducedMotion;
     _run = RunController(
       onStart: () {},
       onFlap: () {
@@ -55,6 +62,49 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   }
 
   final PlaneBody _body = PlaneBody();
+  final CrashEffects _crashFx = CrashEffects();
+  final Vector2 _shake = Vector2.zero(); // reused camera offset
+  final NearMissTracker _nearMiss = NearMissTracker();
+
+  /// Shows a "CLOSE!" label above the plane.
+  void _showNearMiss() => world.add(
+    NearMissLabel(
+      at: Vector2(
+        GameConfig.planeStartX + GameConfig.planeWidth / 2,
+        _body.y - 8,
+      ),
+      isPaused: () => _run.state == RunState.paused,
+    ),
+  );
+
+  /// Triggers the near-miss feedback, for tests.
+  @visibleForTesting
+  void debugNearMiss() => _showNearMiss();
+  late final bool Function() _reducedMotion;
+
+  /// The device's "remove animations" / reduced-motion setting.
+  bool _systemReducedMotion() {
+    final ctx = buildContext;
+    return ctx != null && (MediaQuery.maybeDisableAnimationsOf(ctx) ?? false);
+  }
+
+  /// Current crash effects, for tests.
+  @visibleForTesting
+  CrashEffects get crashEffects => _crashFx;
+  double _hoverTime = 0; // seconds spent in the ready state since the reset
+
+  /// Plane height, for tests.
+  @visibleForTesting
+  double get planeY => _body.y;
+
+  /// Ends the run as a collision would, for tests that need a crash at a
+  /// known moment.
+  @visibleForTesting
+  void debugCrash() => _transition(_run.crash);
+
+  /// Cloud positions, for tests.
+  @visibleForTesting
+  List<double> get cloudXs => [for (final c in _field.clouds) c.x];
   late final CloudField _field;
   late final RunController _run;
   late final ScoreKeeper _score;
@@ -74,6 +124,7 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   RunState get runState => _run.state;
   int get highScore => _score.highScore;
   int get score => _score.score;
+  int get runsPlayed => _score.runsPlayed;
   bool get newBest => _score.newBest;
 
   /// True once the restart delay has passed in the game-over state.
@@ -93,6 +144,9 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void _transition(void Function() action) {
     final before = _run.state;
     action();
+    if (before == RunState.playing && _run.state == RunState.gameOver) {
+      _crashFx.start(reducedMotion: _reducedMotion());
+    }
     _syncOverlays();
     _syncMusic(before, _run.state);
   }
@@ -202,6 +256,8 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
     world.add(_smoke);
     world.add(PlaneComponent(_body, isRunning: running));
     world.add(ScoreHud(score: _score, runState: () => _run.state));
+    world.add(ReadyPrompt(runState: () => _run.state));
+    world.add(CrashFlash(_crashFx));
     await minTime;
   }
 
@@ -212,11 +268,22 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void update(double dt) {
     final step = min(dt, GameConfig.maxFrameDelta);
     _run.update(step);
+    _crashFx.update(step);
+    // The getter returns a copy, so assign through the setter.
+    camera.viewfinder.position = _shake
+      ..setValues(_crashFx.shakeX, _crashFx.shakeY);
     restartReady.value = _run.canRestart;
+    if (_run.state == RunState.ready) {
+      _hoverTime += step;
+      _body.hover(_hoverTime);
+    }
+    if (_run.state == RunState.gameOver) {
+      _body.fallToGround(step); // clouds stay frozen; taps never flap here
+    }
     if (_run.state == RunState.playing) {
       _body.step(step);
       final speed = DifficultyCurve.speedFor(_score.score);
-      for (final spec in _field.step(step, speed: speed)) {
+      for (final spec in _field.step(step, speed: speed, score: _score.score)) {
         final c = CloudComponent(spec);
         _cloudComponents[spec] = c;
         world.add(c);
@@ -237,6 +304,9 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
           _audio.playScore();
           _haptics.score();
         }
+        for (var i = _nearMiss.update(_body.y, _field.clouds); i > 0; i--) {
+          _showNearMiss();
+        }
       }
     }
     super.update(step);
@@ -245,6 +315,13 @@ class FrightFlightGame extends FlameGame with TapCallbacks {
   void _reset() {
     _score.reset();
     _body.reset();
+    _hoverTime = 0;
+    _crashFx.clear();
+    _nearMiss.reset();
+    for (final l in world.children.whereType<NearMissLabel>().toList()) {
+      l.removeFromParent();
+    }
+    camera.viewfinder.position = _shake..setZero();
     _smoke.clear();
     _field.reset();
     for (final c in _cloudComponents.values) {

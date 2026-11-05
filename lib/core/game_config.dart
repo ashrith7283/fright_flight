@@ -93,11 +93,56 @@ class GameConfig {
   static const int maxCloudsPerGroup = 2; // must stay below laneCount
   static const double cloudWidth = 160;
   static const double cloudHeight = 52;
-  static const double scrollSpeed = 220; // base speed at score 0
-  static const double scrollSpeedPerPoint = 1;
-  static const double maxScrollSpeed = 260;
-  static const double spawnSpacing = 460;
   static const double firstGroupDistance = 300;
+
+  // Difficulty ramp: everything below eases from its base at score 0 to its
+  // limit at [rampEndScore], then holds.
+  static const int rampEndScore = 60;
+  static const double scrollSpeed = 220; // base speed at score 0
+  static const double maxScrollSpeed = 300;
+  static const double scrollSpeedPerPoint =
+      (maxScrollSpeed - scrollSpeed) / rampEndScore;
+  static const double spawnSpacing = 460; // base spacing at score 0
+  static const double minSpawnSpacing = 440;
+  static const double spawnSpacingPerPoint =
+      (spawnSpacing - minSpawnSpacing) / rampEndScore;
+  static const double twoCloudShareBase = 0.5;
+  static const double twoCloudShareMax = 0.8;
+
+  // Moving clouds: single-cloud groups may drift within their lane.
+  static const int movingCloudScore = 50;
+  static const double movingCloudChance = 0.35;
+  static const double movingCloudAmplitude = 18;
+  static const double movingCloudPeriod = 2.4; // seconds
+
+  // Ready state: the plane hovers around its start position.
+  static const double hoverAmplitude = 6;
+  static const double hoverPeriod = 1.6; // seconds
+
+  // "TAP TO FLY" prompt in the ready state, centred under the plane.
+  static const double promptX = planeStartX + planeWidth / 2;
+  static const double promptY = planeStartY + planeHeight + 30;
+  static const double promptFontSize = 22;
+  static const double promptPulsePeriod = 1.2; // seconds
+  static const double promptMinAlpha = 0.35;
+
+  // Game feel (cosmetic only; never affects collisions, score or timing).
+  static const double scorePopScale = 1.35;
+  static const double scorePopDuration = 0.25; // seconds
+  static const double crashShakeAmplitude = 6;
+  static const double crashShakeDuration = 0.35; // seconds
+  static const double crashFlashAlpha = 0.6;
+  static const double crashFlashDuration = 0.2; // seconds
+  static const double nearMissMargin =
+      1.6; // normalised ellipse value; 1 = touching
+  static const double nearMissLabelDuration = 0.6; // seconds
+  static const double nearMissLabelRise = 30; // world units over its lifetime
+
+  // Medals: minimum final score for each tier.
+  static const int bronzeScore = 10;
+  static const int silverScore = 25;
+  static const int goldScore = 50;
+  static const int platinumScore = 100;
 
   // Loading screen: minimum time shown at cold start.
   static const Duration loadingMinDuration = Duration(milliseconds: 1200);

@@ -53,13 +53,17 @@ Do not explain basics at length.
 ## Game rules (baseline for specs)
 - Single input: tap anywhere to flap. The plane has gravity and a flap impulse.
 - Cloud obstacles are ellipses in three horizontal lanes. Each group fills one or two
-  lanes, never all three, so a free lane always exists. Scroll speed and spawn spacing
-  follow a gentle difficulty ramp, capped so the game stays fair and always completable.
+  lanes, never all three, so a free lane always exists. Scroll speed, spawn spacing and
+  the share of two-cloud groups ramp up to a set score (`rampEndScore`, 60) and then
+  hold, capped so the game stays fair and always completable (checked by a bot
+  simulation test). From a set score some single clouds drift within their lane.
 - Score +1 when the plane passes a cloud group. High score persists locally.
-- Collision with a cloud, the ground or the ceiling ends the run immediately.
-- Game states: `ready` (tap to start), `playing`, `gameOver`.
+- Collision with a cloud or the ground ends the run immediately. The ceiling does not:
+  it stops the plane, which then falls.
+- Game states: `menu`, `ready` (plane hovers, "TAP TO FLY"), `playing`, `paused`,
+  `gameOver`.
 
-## Ads policy (applies to the `ads` change)
+## Ads policy (applies to the `ads` change, deferred to version 2)
 - Interstitial: at most once every N game-overs (N configurable, start at 3), never
   during a run, never within the first 2 runs of a fresh install, and with a minimum
   time gap between interstitials.
@@ -103,13 +107,16 @@ Each item is one OpenSpec change (propose, review, apply, archive).
    14-day clock.**
 5. `art-audio-polish`: parallax sky, plane tilt, sound effects, haptics, tuned
    difficulty curve (done during the closed-test wait).
-6. `ads`: AdMob integration per the ads policy above, with test IDs, UMP consent,
-   graceful failure.
-7. `release-final`: Crashlytics, store listing assets, `app-ads.txt`, production
-   release after Play grants production access.
+6. `release-final`: Crashlytics, store listing assets, production release after Play
+   grants production access. (`app-ads.txt` is only needed once ads exist.)
+
+### Version 2 (deferred)
+- `ads`: AdMob integration per the ads policy above, with test IDs, UMP consent,
+  graceful failure. Needs `app-ads.txt` and updates to the privacy policy and the Play
+  Data safety form.
 
 ## Non-goals for v1
-iOS, in-app purchases (including "remove ads"), online leaderboards, multiple
+Ads (AdMob; see Version 2), iOS, in-app purchases (including "remove ads"), online leaderboards, multiple
 characters, accounts or login, localisation beyond English, tablet layouts.
 
 ## Working agreement with Claude Code

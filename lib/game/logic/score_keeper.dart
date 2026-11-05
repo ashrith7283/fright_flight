@@ -11,19 +11,28 @@ class ScoreKeeper {
   int score = 0;
   int highScore = 0;
 
+  /// Finished runs (game overs); abandoned runs are not counted.
+  int runsPlayed = 0;
+
   /// True when the finished run beat the high score held before it.
   bool newBest = false;
 
   int _lastCountedGroupId = -1;
   bool _finished = false;
 
-  /// Loads the stored high score. Missing, negative or failing reads give 0.
+  /// Loads the stored high score and runs played. Missing, negative or
+  /// failing reads give 0, each independently.
   Future<void> load() async {
+    highScore = await _readCount(_storage.readHighScore);
+    runsPlayed = await _readCount(_storage.readRunsPlayed);
+  }
+
+  static Future<int> _readCount(Future<int?> Function() read) async {
     try {
-      final stored = await _storage.readHighScore();
-      highScore = (stored == null || stored < 0) ? 0 : stored;
+      final stored = await read();
+      return (stored == null || stored < 0) ? 0 : stored;
     } catch (_) {
-      highScore = 0;
+      return 0;
     }
   }
 
@@ -43,14 +52,24 @@ class ScoreKeeper {
     return passed.length;
   }
 
-  /// Ends the run. Saves once, and only if the high score was beaten.
-  /// The in-memory value is updated first and kept if the write fails.
+  /// Ends the run: counts it as played (saved once) and saves the high score
+  /// once, only if it was beaten. In-memory values are updated first and kept
+  /// if a write fails. Only called at game over, never for abandoned runs.
   Future<void> finishRun() async {
     if (_finished) return;
     _finished = true;
-    if (score <= highScore) return;
-    highScore = score;
-    newBest = true;
+    runsPlayed++;
+    final beaten = score > highScore;
+    if (beaten) {
+      highScore = score;
+      newBest = true;
+    }
+    try {
+      await _storage.writeRunsPlayed(runsPlayed);
+    } catch (_) {
+      // Storage failures must never interrupt play.
+    }
+    if (!beaten) return;
     try {
       await _storage.writeHighScore(highScore);
     } catch (_) {

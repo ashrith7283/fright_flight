@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../game/logic/medals.dart';
 import 'glass_panel.dart';
+import 'medal_badge.dart';
 import 'pill_button.dart';
 import 'settings_toggles.dart';
 
@@ -14,9 +16,13 @@ class MainMenu extends StatelessWidget {
     required this.onToggleMute,
     required this.vibration,
     required this.onToggleVibration,
+    this.runsPlayed = 0,
   });
 
   final int highScore;
+
+  /// Finished runs so far.
+  final int runsPlayed;
   final VoidCallback onPlay;
   final ValueListenable<bool> muted;
   final VoidCallback onToggleMute;
@@ -95,10 +101,24 @@ class MainMenu extends StatelessWidget {
                               letterSpacing: 3,
                             ),
                           ),
+                          if (Medals.forScore(highScore) case final medal?) ...[
+                            const SizedBox(width: 8),
+                            MedalBadge(medal: medal, showLabel: false),
+                          ],
                         ],
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 6),
+                    Text(
+                      'RUNS  $runsPlayed',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 3,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
                     PillButton(
                       label: 'Play',
                       icon: Icons.play_arrow_rounded,

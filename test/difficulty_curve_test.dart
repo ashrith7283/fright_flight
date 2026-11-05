@@ -12,8 +12,53 @@ void main() {
   test('rises by the configured amount per point', () {
     expect(
       DifficultyCurve.speedFor(5) - DifficultyCurve.speedFor(4),
-      GameConfig.scrollSpeedPerPoint,
+      closeTo(GameConfig.scrollSpeedPerPoint, 1e-9),
     );
+  });
+
+  test('speed reaches the cap exactly at the ramp end', () {
+    expect(
+      DifficultyCurve.speedFor(GameConfig.rampEndScore),
+      closeTo(GameConfig.maxScrollSpeed, 1e-9),
+    );
+    expect(
+      DifficultyCurve.speedFor(GameConfig.rampEndScore - 1),
+      lessThan(GameConfig.maxScrollSpeed),
+    );
+  });
+
+  group('spacing', () {
+    test('base at 0, shrinks per point, floor at ramp end and beyond', () {
+      expect(DifficultyCurve.spacingFor(0), GameConfig.spawnSpacing);
+      expect(
+        DifficultyCurve.spacingFor(10) - DifficultyCurve.spacingFor(11),
+        closeTo(GameConfig.spawnSpacingPerPoint, 1e-9),
+      );
+      expect(
+        DifficultyCurve.spacingFor(GameConfig.rampEndScore),
+        closeTo(GameConfig.minSpawnSpacing, 1e-9),
+      );
+      expect(DifficultyCurve.spacingFor(5000), GameConfig.minSpawnSpacing);
+      expect(DifficultyCurve.spacingFor(-4), GameConfig.spawnSpacing);
+    });
+  });
+
+  group('two-cloud share', () {
+    test('base at 0, halfway mid-ramp, max at ramp end and beyond', () {
+      expect(DifficultyCurve.twoCloudShare(0), GameConfig.twoCloudShareBase);
+      expect(
+        DifficultyCurve.twoCloudShare(GameConfig.rampEndScore ~/ 2),
+        closeTo(
+          (GameConfig.twoCloudShareBase + GameConfig.twoCloudShareMax) / 2,
+          1e-9,
+        ),
+      );
+      expect(
+        DifficultyCurve.twoCloudShare(GameConfig.rampEndScore),
+        closeTo(GameConfig.twoCloudShareMax, 1e-9),
+      );
+      expect(DifficultyCurve.twoCloudShare(999), GameConfig.twoCloudShareMax);
+    });
   });
 
   test('is capped at the maximum speed', () {

@@ -22,4 +22,26 @@ void main() {
       throwsA(anything),
     );
   });
+
+  group('runs played', () {
+    test('missing key reads as null', () async {
+      SharedPreferences.setMockInitialValues({});
+      expect(await SharedPreferencesStorageService().readRunsPlayed(), isNull);
+    });
+
+    test('round trip', () async {
+      SharedPreferences.setMockInitialValues({});
+      final s = SharedPreferencesStorageService();
+      await s.writeRunsPlayed(7);
+      expect(await s.readRunsPlayed(), 7);
+    });
+
+    test('wrong-typed value throws', () async {
+      SharedPreferences.setMockInitialValues({'runs_played': 'oops'});
+      expect(
+        SharedPreferencesStorageService().readRunsPlayed(),
+        throwsA(anything),
+      );
+    });
+  });
 }

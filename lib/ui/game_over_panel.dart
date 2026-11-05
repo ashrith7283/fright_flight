@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../game/logic/medals.dart';
 import 'glass_panel.dart';
+import 'medal_badge.dart';
 import 'pill_button.dart';
 
-/// Game-over card: score, best, a new-best badge and the Restart and Menu
-/// buttons. The buttons stay disabled until [restartReady] turns true.
+/// Game-over card: score, best, a new-best badge, the run's medal with the
+/// next-medal hint, and the Restart and Menu buttons. The buttons stay disabled until [restartReady] turns true.
 class GameOverPanel extends StatelessWidget {
   const GameOverPanel({
     super.key,
@@ -75,7 +77,9 @@ class GameOverPanel extends StatelessWidget {
                       letterSpacing: 3,
                     ),
                   ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
+                _MedalInfo(score: score),
+                const SizedBox(height: 14),
                 ValueListenableBuilder<bool>(
                   valueListenable: restartReady,
                   builder: (_, ready, _) => Row(
@@ -132,6 +136,37 @@ class _NewBestBadge extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The run's medal (if any) and how far the next one is.
+class _MedalInfo extends StatelessWidget {
+  const _MedalInfo({required this.score});
+
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    final medal = Medals.forScore(score);
+    final next = Medals.next(score);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (medal != null) MedalBadge(medal: medal),
+        if (next != null) ...[
+          if (medal != null) const SizedBox(height: 4),
+          Text(
+            '${next.pointsNeeded} MORE FOR ${next.medal.label}',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 2,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
