@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Dart obfuscation symbols (keystore and key.properties: see android/.gitignore)
+/build-symbols/

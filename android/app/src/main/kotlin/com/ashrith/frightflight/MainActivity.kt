@@ -1,4 +1,4 @@
-package com.example.fright_flight
+package com.ashrith.frightflight
 
 import io.flutter.embedding.android.FlutterActivity
 
