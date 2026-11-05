@@ -48,9 +48,7 @@ class GameConfig {
 
   // Extra parallax layers (fractions of the base scroll speed).
   static const double bgMountainParallax = 0.12;
-  static const double bgHazeParallax = 0.22;
   static const Color mountainColor = Color(0xFF6F8FB0);
-  static const Color hazeColor = Color(0x55FFFFFF);
 
   // Shared UI look.
   static const Color uiAccent = Color(0xFFE53935);

@@ -6,7 +6,7 @@ import 'package:flame/components.dart';
 import '../../core/game_config.dart';
 import '../logic/sky_palette.dart';
 
-/// Sky (shifting with the score), sun, birds, mountains, haze and hills.
+/// Sky (shifting with the score), sun, birds, mountains and hills.
 /// Purely cosmetic: layers scroll only while [isRunning] returns true and
 /// nothing here takes part in collisions.
 class BackgroundComponent extends PositionComponent {
@@ -19,7 +19,6 @@ class BackgroundComponent extends PositionComponent {
   final int Function() _score;
   double _hillOffset = 0;
   double _mountainOffset = 0;
-  double _hazeOffset = 0;
   double _time = 0;
   SkyState _sky = SkyPalette.day; // eased towards the score's target
 
@@ -36,7 +35,6 @@ class BackgroundComponent extends PositionComponent {
   static final _hillFar = Paint()..color = GameConfig.hillFarColor;
   static final _hillNear = Paint()..color = GameConfig.hillNearColor;
   static final _mountain = Paint();
-  static final _haze = Paint()..color = GameConfig.hazeColor;
   static final _ground = Paint()..color = GameConfig.groundColor;
   static final _groundDark = Paint()..color = GameConfig.groundDarkColor;
 
@@ -84,10 +82,6 @@ class BackgroundComponent extends PositionComponent {
     _mountainOffset =
         (_mountainOffset +
             GameConfig.scrollSpeed * GameConfig.bgMountainParallax * dt) %
-        _layerPeriod;
-    _hazeOffset =
-        (_hazeOffset +
-            GameConfig.scrollSpeed * GameConfig.bgHazeParallax * dt) %
         _layerPeriod;
     _hillOffset =
         (_hillOffset +
@@ -140,24 +134,6 @@ class BackgroundComponent extends PositionComponent {
       canvas.translate(dx, 0);
       canvas.drawPath(_mountainPath, _mountain);
       canvas.restore();
-    }
-
-    // Drifting haze band.
-    for (final dx in [-_hazeOffset, _layerPeriod - _hazeOffset]) {
-      for (final h in const [
-        [100.0, 270.0, 200.0, 26.0],
-        [380.0, 245.0, 240.0, 30.0],
-        [640.0, 285.0, 220.0, 24.0],
-      ]) {
-        canvas.drawOval(
-          Rect.fromCenter(
-            center: Offset(h[0] + dx, h[1]),
-            width: h[2],
-            height: h[3],
-          ),
-          _haze,
-        );
-      }
     }
 
     // Hills: far layer then near layer, scrolling at different rates.

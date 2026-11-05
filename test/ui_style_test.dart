@@ -7,6 +7,7 @@ import 'package:fright_flight/ui/main_menu.dart';
 import 'package:fright_flight/ui/pause_menu.dart';
 import 'package:fright_flight/ui/pill_button.dart';
 import 'package:fright_flight/ui/settings_toggles.dart';
+import 'package:fright_flight/ui/transparent_material.dart';
 
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
@@ -29,6 +30,7 @@ Widget _panel({
 );
 
 void main() {
+  _noUnderlineTests();
   group('game-over panel', () {
     testWidgets('shows score and best at once, no new-best badge', (t) async {
       await t.pumpWidget(_panel(ready: ValueNotifier(false)));
@@ -170,6 +172,23 @@ void main() {
           expect(size.width, greaterThanOrEqualTo(48));
         }
       }
+    });
+  });
+}
+
+void _noUnderlineTests() {
+  group('text decoration', () {
+    testWidgets('overlay text has no underline under the app wrapper', (
+      t,
+    ) async {
+      await t.pumpWidget(
+        MaterialApp(
+          builder: transparentMaterialBuilder,
+          home: const Center(child: Text('FRIGHT')),
+        ),
+      );
+      final style = DefaultTextStyle.of(t.element(find.text('FRIGHT'))).style;
+      expect(style.decoration ?? TextDecoration.none, TextDecoration.none);
     });
   });
 }

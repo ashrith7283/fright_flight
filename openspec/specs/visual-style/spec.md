@@ -58,7 +58,7 @@ Visual styling SHALL NOT change hitboxes, collision results, lane positions, spe
 - **THEN** every cloud on screen is an obstacle cloud; the background contains no clouds
 
 ### Requirement: Layered parallax background
-The background SHALL show at least two additional decorative layers beyond the hills, far mountains and a drifting haze, each scrolling at its own speed slower than the hills, so that farther layers move more slowly than nearer ones. Layers SHALL scroll only while a run is in progress.
+The background SHALL show at least one decorative layer beyond the hills, far mountains, scrolling at a speed slower than the hills, so that farther layers move more slowly than nearer ones. The background SHALL NOT contain oval or haze shapes. Layers SHALL scroll only while a run is in progress.
 
 #### Scenario: Farther layers move slower
 - **WHEN** a run is in progress
@@ -71,6 +71,10 @@ The background SHALL show at least two additional decorative layers beyond the h
 #### Scenario: Layers wrap seamlessly
 - **WHEN** a layer scrolls past its repeat distance
 - **THEN** it wraps with no visible gap or jump
+
+#### Scenario: No haze ovals
+- **WHEN** the background is displayed in any game state
+- **THEN** no translucent oval or haze shapes are drawn in the sky
 
 ### Requirement: Sky progresses with the score
 The sky colours and the sun position SHALL change gradually as the score rises, from day, through sunset, to dusk, then stay at dusk beyond a configured score. They SHALL return to day when a new run starts. Changes SHALL be smooth, with no sudden colour jump.

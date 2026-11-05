@@ -10,6 +10,7 @@ import 'ui/loading_screen.dart';
 import 'ui/main_menu.dart';
 import 'ui/pause_button.dart';
 import 'ui/pause_menu.dart';
+import 'ui/transparent_material.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,7 @@ class _FrightFlightAppState extends State<FrightFlightApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      builder: transparentMaterialBuilder,
       home: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
