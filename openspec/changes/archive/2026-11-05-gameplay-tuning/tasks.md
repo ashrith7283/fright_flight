@@ -26,4 +26,4 @@
 - [x] 5.1 Extend `lane_fit_and_simulation_test` to run the bot at `maxScrollSpeed`, `minSpawnSpacing`, maximum two-cloud share and moving clouds on, with the soft ceiling; if it fails, raise `minSpawnSpacing` until it passes on all seeds and record the value in `design.md`
 - [x] 5.2 Update the "Game rules" section of `openspec/project.md` (ceiling no longer ends a run, ramp to score 60, moving clouds); verify by reading it
 - [x] 5.3 Run `dart format`, `flutter analyze` and `flutter test`; verify all pass
-- [ ] 5.4 Developer plays a release build and confirms the ramp feels moderate and fair, the ceiling feels right and the ready screen reads clearly
+- [x] 5.4 Developer plays a release build and confirms the ramp feels moderate and fair, the ceiling feels right and the ready screen reads clearly

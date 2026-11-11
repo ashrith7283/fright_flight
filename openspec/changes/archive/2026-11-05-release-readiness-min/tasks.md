@@ -3,18 +3,18 @@
 ## 1. App identity
 
 - [x] 1.1 Change `namespace` and `applicationId` to `com.ashrith.frightflight` in `android/app/build.gradle.kts`, move `MainActivity.kt` to `kotlin/com/ashrith/frightflight/` and update its `package`; verify `grep -r "com.example" android lib pubspec.yaml` finds nothing outside generated files
-- [ ] 1.2 Set `android:label` to "Fright Flight" in `AndroidManifest.xml` and the Flutter app title if set; verify `flutter build apk --debug` succeeds and the installed app shows the new label and still opens the main menu
+- [x] 1.2 Set `android:label` to "Fright Flight" in `AndroidManifest.xml` and the Flutter app title if set; verify `flutter build apk --debug` succeeds and the installed app shows the new label and still opens the main menu
 
 ## 2. Launcher icon
 
 - [x] 2.1 Add a reproducible script under `tool/` that generates an original 1024px icon foreground (plane) and background (sky), and record it in `ASSETS.md`; verify the generated PNGs exist and look correct
 - [x] 2.2 Add `flutter_launcher_icons` as a dev dependency with adaptive-icon config in `pubspec.yaml`, run it, and verify the mipmap and adaptive icon resources are replaced and `flutter build apk --debug` succeeds
-- [ ] 2.3 Verify the icon on a device or emulator launcher under a circular mask shows the whole plane
+- [x] 2.3 Verify the icon on a device or emulator launcher under a circular mask shows the whole plane
 
 ## 3. Signing, shrinking and permissions
 
 - [x] 3.1 Add the `key.properties`-based `upload` signing config with debug fallback and warning in `android/app/build.gradle.kts`, and git-ignore `key.properties`, `*.jks`, `*.keystore` and `build-symbols/`; verify `git check-ignore` matches each and `flutter build apk --release` without the file completes with the warning
-- [ ] 3.2 Enable `isMinifyEnabled` and `isShrinkResources` for release; verify the release APK installs and a run plays with sound, haptics and a persisted best score
+- [x] 3.2 Enable `isMinifyEnabled` and `isShrinkResources` for release; verify the release APK installs and a run plays with sound, haptics and a persisted best score
 - [x] 3.3 Verify the merged release manifest has no INTERNET permission (inspect with `aapt dump permissions` or the merged manifest report)
 - [x] 3.4 Check the effective `minSdk` is at least 23 and `targetSdk` meets Google Play's current requirement for new apps; raise explicitly if not, and verify with the build output
 

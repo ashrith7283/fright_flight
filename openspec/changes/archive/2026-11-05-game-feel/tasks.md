@@ -17,4 +17,4 @@
 ## 4. Integration
 
 - [x] 4.1 Add a test that score and state transitions are identical with effects enabled and disabled for a fixed seeded run; run `dart format`, `flutter analyze` and `flutter test` and verify all pass
-- [ ] 4.2 Developer plays a release build and confirms the pop, shake, flash, fall and near-miss label feel good and not distracting
+- [x] 4.2 Developer plays a release build and confirms the pop, shake, flash, fall and near-miss label feel good and not distracting

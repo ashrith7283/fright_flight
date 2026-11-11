@@ -48,10 +48,10 @@ ads are added.
 4. Keep the test running for 14 continuous days, then apply for production access.
 
 ## Manual device checklist (per release)
-- [ ] Tap latency feels immediate
-- [ ] Pause/resume and back button behave
-- [ ] Incoming call or app switch pauses the run and resumes cleanly
-- [ ] Frame rate acceptable on a low-end phone
-- [ ] Sound, music, vibration toggles work and persist
-- [ ] Best score persists after closing the app
-- [ ] Launcher icon and name correct; adaptive icon masks cleanly
+- [x] Tap latency feels immediate
+- [x] Pause/resume and back button behave
+- [x] Incoming call or app switch pauses the run and resumes cleanly
+- [x] Frame rate acceptable on a low-end phone
+- [x] Sound, music, vibration toggles work and persist
+- [x] Best score persists after closing the app
+- [x] Launcher icon and name correct; adaptive icon masks cleanly

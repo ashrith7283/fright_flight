@@ -17,4 +17,4 @@
 ## 4. Integration
 
 - [x] 4.1 Run `dart format`, `flutter analyze` and `flutter test` and verify all pass
-- [ ] 4.2 Developer checks on a device that the panel and menu read clearly and fit the screen
+- [x] 4.2 Developer checks on a device that the panel and menu read clearly and fit the screen
