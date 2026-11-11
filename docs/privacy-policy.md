@@ -1,6 +1,6 @@
 # Privacy Policy — Fright Flight
 
-_Last updated: 5 November 2026_
+_Last updated: 11 November 2026_
 
 Fright Flight ("the game") is a free arcade game for Android.
 
@@ -10,9 +10,9 @@ require an account, does not use the internet and does not contain advertising o
 analytics.
 
 ## What is stored on your device
-The game saves your best score and your sound and vibration settings on your device
-only, using Android's local app storage. This data never leaves your device and is
-deleted when you uninstall the game or clear its storage.
+The game saves your best score, game statistics such as runs played, and your sound
+and vibration settings on your device only, using Android's local app storage. This
+data never leaves your device and is deleted when you uninstall the game or clear its storage.
 
 ## Children
 The game does not knowingly collect any information from anyone, including children.
