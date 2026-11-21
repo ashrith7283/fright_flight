@@ -1,20 +1,20 @@
-# fright_flight
+# Fright Flight
 
-A new Flutter project.
+A free, one-tap endless arcade game for Android, built with Flutter and Flame. Tap to
+keep a little plane in the air, fly over, under and between the clouds, score a point for
+every cloud group you pass, and chase the Bronze, Silver, Gold and Platinum medals.
 
-## Getting Started
+- Landscape, phones, Android only for v1
+- No ads, no accounts, no personal data collected
+- Specs live in [`openspec/`](openspec/); release steps in [`docs/release.md`](docs/release.md)
+  and [`publish-checklist.md`](publish-checklist.md)
+- Art and audio credits: [`ASSETS.md`](ASSETS.md). Store listing text and graphics: [`store/`](store/)
 
-This project is a starting point for a Flutter application.
+## Development
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+dart format . && flutter analyze && flutter test
+```
 
 ## Running on an Android Emulator
 

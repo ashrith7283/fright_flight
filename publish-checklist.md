@@ -7,7 +7,7 @@ below, in order. See [`docs/release.md`](docs/release.md) for build commands.
 - [ ] Back up the upload keystore (`~/keys/fright-flight-upload.jks`) and its passwords
       somewhere off this Mac (password manager or encrypted cloud storage)
 - [ ] Copy `build-symbols/` for this build outside the repo, labelled `1.0.0+1`
-- [ ] Optional: fast-forward `main` to `dev`
+- [x] Optional: fast-forward `main` to `dev`
 
 ## Play Console (starts the 14-day clock)
 - [ ] Check the name "Fright Flight" is available, then create the app (free, game)
@@ -23,12 +23,12 @@ below, in order. See [`docs/release.md`](docs/release.md) for build commands.
 
 ## During the 14-day wait
 - [ ] Store listing assets:
-  - [ ] 512×512 icon
-  - [ ] 1024×500 feature graphic
+  - [x] 512×512 icon (`store/icon-512.png`)
+  - [x] 1024×500 feature graphic (`store/feature-graphic-1024x500.png`)
   - [ ] At least 2 phone screenshots (landscape)
-  - [ ] Short description (max 80 characters)
-  - [ ] Full description
-- [ ] Optional: replace the template `description` in `pubspec.yaml` and the template
+  - [x] Short description (max 80 characters, `store/listing.md`)
+  - [x] Full description (`store/listing.md`)
+- [x] Optional: replace the template `description` in `pubspec.yaml` and the template
       `README.md`
 
 ## After the 14 days
